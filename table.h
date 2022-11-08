@@ -25,22 +25,6 @@ const struct _RegMapping {
     char* regName; // symbolic name as string
     char* regNumber; // string for binary representation
 };
-const struct _RFunctionMapping {
-    char* functName; // symbolic name as string
-    char* functCode; // string for binary representation
-};
-const struct _IFunctionMapping {
-    char* functName; // symbolic name as string
-    char* functCode; // string for binary representation
-};
-const struct _JFunctionMapping {
-    char* functName; // symbolic name as string
-    char* functCode; // string for binary representation
-};
-const struct _SpecialFunctionMapping {
-    char* functName; // symbolic name as string
-    char* functCode; // string for binary representation
-};
 
 const struct instruction {
     char *str;
@@ -62,7 +46,4 @@ char* getOper(char* check);
 char* getFunct(char* check);
 
 typedef struct _RegMapping RegMapping;
-typedef struct _RFunctionMapping RFunctMapping;
-typedef struct _JFunctionMapping JFunctMapping;
-typedef struct _IFunctionMapping IFunctMapping;
 typedef struct _SpecialFunctionMapping SpecialFunctMapping;
