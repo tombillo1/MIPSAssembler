@@ -77,49 +77,6 @@ char* parseASM(const char* const pASM) {
    result->rd = 255;
    result->rs = 255;
    result->rt = 255;
-
-
-   //special cases
-
-   if (strcmp(command, "lui") == 0) 
-   {
-      result->rs = 0;
-      result->RS = "00000\0";
-
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RS);
-      strcat(holder, result->RT);
-      strcat(holder, result->IMM);
-   }
-
-   if (strcmp(command, "bgtz") == 0) 
-   {
-      result->rs = 0;
-      result->RT = "00000\0";
-
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RS);
-      strcat(holder, result->RT);
-      strcat(holder, result->IMM);
-   }
-
-   if(strcmp(command, "syscall") == 0 || strcmp(command, "nop") == 0)
-   {
-      result->rs = 0;
-      result->RS = "00000\0";
-
-      result->rd = 0;
-      result->RD = "00000\0";
-
-      result->rt = 0;
-      result->RT = "00000\0";
-
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RD);
-      strcat(holder, result->RS);
-      strcat(holder, result->RT);
-   }
-   //end special cases
    
    while (curr != NULL) {
       char* val;
@@ -137,39 +94,38 @@ char* parseASM(const char* const pASM) {
          val = getArg3(command);
       }
 
-	  if ((strcmp(command, "lw") == 0 && count == 2) || (strcmp(command, "sw") == 0 && count == 2)) 
-	  {	
-	   
-		char* temp1 =  strtok(curr, "(");
+	   if ((strcmp(command, "lw") == 0 && count == 2) || (strcmp(command, "sw") == 0 && count == 2)) 
+	   {
+         char* temp1 =  strtok(curr, "(");
 
-      result->Imm = atoi(temp1);
-
-
-      if(temp1 == NULL)
-      {
-         result->IMM = NULL;
-      }
-      else
-      {
-         result->IMM = imm_to_binary(atoi(temp1));
-      }
-
-      temp1 = strtok(NULL, ")");
+         result->Imm = atoi(temp1);
 
 
-      result->rsName = temp1;
-      result->rs = getValue(temp1);
-      if(temp1 == NULL)
-      {
-         result->RS = NULL;
-      }
-      else
-      {
-         result->RS = reg_to_binary(result->rs);
-      }
+         if(temp1 == NULL)
+         {
+            result->IMM = NULL;
+         }
+         else
+         {
+            result->IMM = imm_to_binary(atoi(temp1));
+         }
 
-      curr = NULL;
-      continue;
+         temp1 = strtok(NULL, ")");
+
+
+         result->rsName = temp1;
+         result->rs = getValue(temp1);
+         if(temp1 == NULL)
+         {
+            result->RS = NULL;
+         }
+         else
+         {
+            result->RS = reg_to_binary(result->rs);
+         }
+
+         curr = NULL;
+         continue;
       }
 
       //CHECK TO SEE WHAT ARGUMENT WE ARE CHANGING
@@ -272,6 +228,43 @@ char* parseASM(const char* const pASM) {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS); //needs to take a label addr.
    }
+   else if (strcmp(command, "lui") == 0) 
+   {
+      result->rs = 0;
+      result->RS = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+   else if (strcmp(command, "bgtz") == 0) 
+   {
+      result->rs = 0;
+      result->RT = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+   else if(strcmp(command, "syscall") == 0 || strcmp(command, "nop") == 0)
+   {
+      result->rs = 0;
+      result->RS = "00000\0";
+
+      result->rd = 0;
+      result->RD = "00000\0";
+
+      result->rt = 0;
+      result->RT = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RD);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+   }
+
    return holder;
 }
 
