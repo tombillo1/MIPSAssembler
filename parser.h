@@ -2,6 +2,6 @@
 #define ASMPARSER_H
 #include "ParseResult.h"
 
-ParseResult* parseASM(const char* const pASM);
+char* parseASM(const char* const pASM);
 
 #endif
