@@ -21,13 +21,15 @@
 // Ashaz Ahmed
 // ashaz
 #include "table.h"
+#include "parser.h"
+#include "ParseResult.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#define INSTRUCTIONSIZE 8
+#define INSTRUCTIONSIZE 25
 
 static RegMapping RegMappings[] = {
     {"$zero", "00000"},
@@ -56,62 +58,36 @@ static RegMapping RegMappings[] = {
     {"$gp", "11100"},
     {"$sp", "11101"},
     {"$fp", "11110"},
-    {"$ra", "11111"},
-    {NULL, 0}
+    {"$ra", "11111"}
 };
-
-static RFunctMapping RFunctMappings[] = {
-    {"add", "100000" },
-    {"addu","100001"},
-    {"and","100100"},
-    {"nor", "100111"},
-    {"mul", "011001"},
-    {"mult", "011000"},
-    {"sll", "000000" },
-	{"slt", "101010" },
-    {"sra", "000011"},
-    {"srav", "000111"},
-    {"sub", "100010"},
-    {NULL, 0}
-};
-
-static IFunctMapping IFunctMappings[] = {
-    {"addi", "001000"},
-    {"andi", "001100"},
-    {"addiu","001001"},
-    {"slti", "001010"},
-    {"lui", "001111"},
-    {"lw", "100011" },
-	{"sw", "101011" },
-    {"beq", "000100"},
-    {"blez", "000110"},
-    {"bgtz", "000111"},
-    {"bne", "000101"},
-    {NULL, 0}
-};
-
-static JFunctMapping JFunctMappings[] = {
-    {"j", "000010"},
-    {NULL, 0}
-};
-
-static SpecialFunctMapping SpecialFunctMappings[] = {
-    {"syscall", "001100"}, // ask TA ab this one
-    {"nop", "000000"},
-    {NULL, 0}
-};
-
 
 struct instructionFormat instructionFormats[] = {
 
-    {"add", "rd", "rs", "rt"},
-    {"addi", "rt", "rs", "immediate"},
-    {"mul", "rd", "rs", "rt"},
-    {"beq", "rs", "rt", "immediate"},
-    {"lw", "rt", "offset", NULL},
-    {"sw", "rt", "offset", NULL},
-    {"lui", "rt", "immediate", NULL},
-    {"sub", "rd", "rs", "rt"}
+    {"add", "rd", "rs", "rt"}, // yes
+    {"addi", "rt", "rs", "immediate"}, // yes
+    {"addu", "rd", "rs", "rt"}, // yes
+    {"addiu", "rt", "rs", "immediate"}, // yes
+    {"and", "rd", "rs", "rt"}, // yes
+    {"andi", "rt", "rs", "immediate"}, // yes
+    {"nor", "rd", "rs", "rt"}, // yes
+    {"slti", "rt", "rs", "immediate"}, // yes
+    {"sll", "rd", "rt", "immediate"}, // yes
+    {"slt", "rd", "rs", "rt"}, // yes
+    {"mul", "rd", "rs", "rt"}, // yes
+    {"mult", "rs", "rt", NULL}, //change
+    {"beq", "rs", "rt", "immediate"}, // yes
+    {"bne", "rs", "rt", "immediate"}, // yes
+    {"bgtz", "rs", "immediate", NULL}, // yes
+    {"lw", "rt", "offset", NULL}, // yes
+    {"sw", "rt", "offset", NULL}, // yes
+    {"lui", "rt", "immediate", NULL}, // yes
+    {"sub", "rd", "rs", "rt"}, // yes
+    {"syscall", NULL, NULL, NULL},
+    {"nop", NULL, NULL, NULL},
+    {"j", NULL, NULL, NULL}, //change
+    {"blez", "rs", "rt", "immediate"}, // yes
+    {"srav", "rd", "rs", "rt"}, // yes
+    {"sra", "rd", "rs", "rt"} // yes
 };
 
 char* getArg1(char* check) {
