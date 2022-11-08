@@ -71,6 +71,5 @@ void clearResult(ParseResult* const pPR);
  *   Pre:  Log is open on an output file.
  *         pPR points to a proper ParseResult object.
  */
-void printResult(FILE* Log, const ParseResult* const pPR);
-
+char* printResult(const ParseResult* const pPR);
 #endif
