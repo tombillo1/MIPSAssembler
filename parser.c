@@ -34,8 +34,10 @@
 char* reg_to_binary(int val);
 char* imm_to_binary(int input);
 
-ParseResult* parseASM(const char* const pASM) {
+char* parseASM(const char* const pASM) {
 	
+   char* holder = "";
+
    ParseResult* result;
    char* command;
    int index = 0;
@@ -76,10 +78,48 @@ ParseResult* parseASM(const char* const pASM) {
    result->rs = 255;
    result->rt = 255;
 
+
+   //special cases
+
    if (strcmp(command, "lui") == 0) 
    {
       result->rs = 0;
+      result->RS = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
    }
+
+   if (strcmp(command, "bgtz") == 0) 
+   {
+      result->rs = 0;
+      result->RT = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+
+   if(strcmp(command, "syscall") == 0 || strcmp(command, "nop") == 0)
+   {
+      result->rs = 0;
+      result->RS = "00000\0";
+
+      result->rd = 0;
+      result->RD = "00000\0";
+
+      result->rt = 0;
+      result->RT = "00000\0";
+
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RD);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+   }
+   //end special cases
    
    while (curr != NULL) {
       char* val;
@@ -102,93 +142,137 @@ ParseResult* parseASM(const char* const pASM) {
 	   
 		char* temp1 =  strtok(curr, "(");
 
-        result->Imm = atoi(temp1);
+      result->Imm = atoi(temp1);
 
 
-        if(temp1 == NULL)
-        {
-           result->IMM = NULL;
-        }
-        else
-        {
-           result->IMM = imm_to_binary(atoi(temp1));
-        }
+      if(temp1 == NULL)
+      {
+         result->IMM = NULL;
+      }
+      else
+      {
+         result->IMM = imm_to_binary(atoi(temp1));
+      }
+
+      temp1 = strtok(NULL, ")");
 
 
-        temp1 = strtok(NULL, ")");
+      result->rsName = temp1;
+      result->rs = getValue(temp1);
+      if(temp1 == NULL)
+      {
+         result->RS = NULL;
+      }
+      else
+      {
+         result->RS = reg_to_binary(result->rs);
+      }
 
-
-        result->rsName = temp1;
-        result->rs = getValue(temp1);
-        if(temp1 == NULL)
-        {
-           result->RS = NULL;
-        }
-        else
-        {
-           result->RS = reg_to_binary(result->rs);
-        }
-
-        curr = NULL;
-        continue;
-        }
+      curr = NULL;
+      continue;
+      }
 
       //CHECK TO SEE WHAT ARGUMENT WE ARE CHANGING
-      if (strcmp(val, "rd") == 0) {
+      if (strcmp(val, "rd") == 0) 
+      {
          result->rdName = curr;
-		 result->rd = getValue(curr);
+		   result->rd = getValue(curr);
 		 
-		 if(curr == NULL)
-		 {
-			result->RD = NULL;
-	     }
-	     else
-	     {
-			result->RD = reg_to_binary(result->rd);
-	     }
+		   if(curr == NULL)
+		   {
+			   result->RD = NULL;
+	      }
+	      else
+	      {
+			   result->RD = reg_to_binary(result->rd);
+	      }
       }
       else if (strcmp(val, "rs") == 0) {
          result->rsName = curr;
          result->rs = getValue(curr);
          if(curr == NULL)
-		 {
-			result->RS = NULL;
-	     }
-	     else
-	     {
-			result->RS = reg_to_binary(result->rs);
-	     }
+		   {
+			   result->RS = NULL;
+	      }
+	      else
+	      {
+			   result->RS = reg_to_binary(result->rs);
+	      }
       }
-      else if (strcmp(val, "rt") == 0) {
+      else if (strcmp(val, "rt") == 0) 
+      {
          result->rtName = curr;
          result->rt = getValue(curr);
          if(curr == NULL)
-		 {
-			result->RT = NULL;
-	     }
-	     else
-	     {
-			result->RT = reg_to_binary(result->rt);
-	     }
+		   {
+			   result->RT = NULL;
+	      }
+	      else
+	      {
+			   result->RT = reg_to_binary(result->rt);
+	      }
       }
       else if (strcmp(val, "immediate") == 0) {
          result->Imm = atoi(curr);
          if(curr == NULL)
-		 {
-			result->IMM = NULL;
-	     }
-	     else
-	     {
-			result->IMM = imm_to_binary(atoi(curr));
-	     }
+		   {
+			   result->IMM = NULL;
+	      }
+	      else
+	      {
+			   result->IMM = imm_to_binary(atoi(curr));
+	      }
+
       }
 
       curr = strtok(NULL, ", ");
    }
-	
-   //free(command);
-   //free(temp);
-   return result;
+
+
+	// comparisons for different instructions
+   // lui has already been done above
+
+
+   if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0)   // for sw and lw instructions
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RT);
+      strcat(holder, result->RS);
+      strcat(holder, result->IMM);
+   }
+   else if(strcmp(result->Mnemonic, "add") == 0 || strcmp(result->Mnemonic, "addu") == 0 || strcmp(result->Mnemonic, "and") == 0 || strcmp(result->Mnemonic, "nor") == 0 || strcmp(result->Mnemonic, "slt") == 0 || strcmp(result->Mnemonic, "mul") == 0 || strcmp(result->Mnemonic, "sub") == 0 || strcmp(result->Mnemonic, "srav") == 0 || strcmp(result->Mnemonic, "sra") == 0) // for R type instructions
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RD);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+   }
+   else if(strcmp(result->Mnemonic, "sll") == 0)
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RD);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+   else if(strcmp(result->Mnemonic, "beq") == 0 || strcmp(result->Mnemonic, "bne") == 0 || strcmp(result->Mnemonic, "blez") == 0)
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+   else if(strcmp(result->Mnemonic, "mult") == 0)
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+   }
+   else if(strcmp(result->Mnemonic, "j") == 0)
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS); //needs to take a label addr.
+   }
+   return holder;
 }
 
 //converts a number to a binary string
@@ -252,4 +336,40 @@ char* imm_to_binary(int input)
     }
    
     return str;
+}
+
+void printByte(FILE *fp, uint32_t Byte)
+{
+    uint32_t Mask = 0x80000000;
+
+    for (int bit = 32; bit > 0; bit--)
+    {
+        fprintf(fp, "%c", ((Byte & Mask) == 0 ? '0' : '1'));
+        Mask = Mask >> 1;
+    }
+}
+
+char* stringToBinary(char* str) 
+{
+	if(str == NULL){
+		return 0x00000000;
+	}
+	size_t l = strlen(str);
+	char* bin = malloc(l *8 +1);
+	bin[0] = '\0';
+	for(size_t i = 0; i < l; i++)
+	{
+		char c = str[i];
+		for(int j = 7; j >= 0; --j)
+		{
+			if(c & (1 << j))
+			{
+				strcat(bin, "1");
+			}
+			else{
+				strcat(bin, "0");
+			}
+		}
+	}
+	return bin;
 }
