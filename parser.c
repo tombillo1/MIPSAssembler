@@ -21,6 +21,7 @@
 // Ashaz Ahmed
 // ashaza
 #include "parser.h"
+#include "table.h"
 #include "ParseResult.h"
 
 /***  Add include directives for here as needed.  ***/
@@ -33,6 +34,9 @@
 
 char* reg_to_binary(int val);
 char* imm_to_binary(int input);
+void printByte(FILE *fp, uint32_t Byte);
+char* stringToBinary(char* str);
+
 
 char* parseASM(const char* const pASM) {
 	
@@ -223,11 +227,7 @@ char* parseASM(const char* const pASM) {
       strcat(holder, result->RS);
       strcat(holder, result->RT);
    }
-   else if(strcmp(result->Mnemonic, "j") == 0)
-   {
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RS); //needs to take a label addr.
-   }
+   //WE NEED TO IMPLEMENT SOMETHING FOR J AND ALSO FOR THE LABEL STUFF
    else if (strcmp(command, "lui") == 0) 
    {
       result->rs = 0;
