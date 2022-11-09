@@ -21,6 +21,8 @@
 // Ashaz Ahmed
 // ashaza
 
+#include "parser.h"
+#include "table.h"
 #include "ParseResult.h"
 #include <stdlib.h>
 
@@ -47,6 +49,8 @@ void clearResult(ParseResult* const pPR) {
 	
 	free(pPR->Mnemonic);
 	pPR->Mnemonic = NULL;
+
+	pPR->label = NULL;
 	
 	pPR->rdName = NULL;
 	pPR->rsName = NULL;
