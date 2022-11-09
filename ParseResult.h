@@ -24,6 +24,7 @@ struct _ParseResult {
    // The assembly code portion
    char* ASMInstruction;    // the assembly instruction, as a C-string
    char* Mnemonic;          // the symbolic name of the instruction
+   char* label;
    char* rdName;            // the symbolic names of the registers, as C-strings;
    char* rsName;            //    NULL if the register field is not specified
    char* rtName;            //    in the assembly instruction
