@@ -5,7 +5,7 @@
 #include "Labels.h"
 
 //defines table entries, number of labels and capacity
-void tableDef (LabelTable* table)
+void tableDef (LTable* table)
 {
     table->entries = 0;
     table->numLab = 0;
@@ -13,9 +13,9 @@ void tableDef (LabelTable* table)
 }
 
 //resizes the label to the correct size
-int resize(LabelTable* table, int updSize)
+int resize(LTable* table, int updSize)
 {
-    LabelEntry* newList = malloc(updSize * sizeof(LabelEntry));
+    LEntry* newList = malloc(updSize * sizeof(LEntry));
 
     char* ptr;
     int holder;
@@ -36,7 +36,7 @@ int resize(LabelTable* table, int updSize)
             holder = updSize;
         }
 
-        memcpy (newList, table->entries, holder * sizeof(LabelEntry));
+        memcpy (newList, table->entries, holder * sizeof(LEntry));
         free(table->entries);
         table->numLab = holder;
     }
@@ -47,9 +47,9 @@ int resize(LabelTable* table, int updSize)
 }
 
 //gets the label from the table
-int getLab (LabelTable* table, char* label)
+int getLab (LTable* table, char* label)
 {
-    LabelEntry *temp = table->entries;
+    LEntry *temp = table->entries;
 
     for(int i = 0;i < table->numLab; i++)
     {
@@ -64,7 +64,7 @@ int getLab (LabelTable* table, char* label)
 }
 
 //adds a table to the table
-int addLab (LabelTable* table, char * label, int addr)
+int addLab (LTable* table, char* label, int addr)
 {
     char* dup = strdup(label);
 
@@ -80,10 +80,10 @@ int addLab (LabelTable* table, char * label, int addr)
             resize(table, table->cap+1);
         }
         
-        LabelEntry* newEntry = table->entries + table->numLab;
+        LEntry* newEntry = table->entries + table->numLab;
+        ++table->numLab;
         newEntry->address = addr;
         newEntry->label = dup;
-        ++table->numLab;
     }
     return 1;               
 }
