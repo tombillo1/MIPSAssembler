@@ -31,11 +31,68 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdbool.h>
 
 char* reg_to_binary(int val);
 char* imm_to_binary(int input);
 void printByte(FILE *fp, uint32_t Byte);
 char* stringToBinary(char* str);
+void parseFile(FILE *in, FILE *out, int pass);
+
+void parseFile(FILE *in, FILE *out, int pass) {
+   int textAddress = 0x00000000;
+   int dataAddress = 0x00002000;
+   int sizeAddresses = 1;
+   bool checkData = false;
+   int index;
+   char *label;
+
+   // Iterate line by line
+    // Pass line to ParseResult
+    char line[256];
+
+    while (fgets(line, sizeof(line), in)) {
+        index = 0;
+
+        // Check if the line is commented
+        if (line[0] == '#') {
+            continue;
+        }
+
+        // Checking the labels declared in .data
+        if (checkData) {
+            if (line[0] == '.' && line[1] == 't') {
+                checkData = false;
+                continue;
+            }
+
+            // add the label to the array
+            for (int i = 0; i < sizeof(line); i++) {
+                if (line[i] == ':') {
+                    index = i;
+                    break;
+                }
+            }
+            
+            // MAYBE HAVE TO FREE
+            label = calloc(index, sizeof(char));
+
+            //Store string label name 
+            strncpy(label, line, index);
+            
+
+            //Add to label table
+
+            dataAddress++;
+        }
+
+        if (line[0] == '.' && line[1] == 'd') {
+            checkData = true;
+            continue;
+        }
+
+    }
+}
 
 
 char* parseASM(const char* const pASM) {
