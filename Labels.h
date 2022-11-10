@@ -1,31 +1,30 @@
-
 #ifndef LABEL_H
 #define LABEL_H
 #include <inttypes.h>
 #include <stdio.h>
 
-struct _LabelEntry{
+struct _LEntry{
     char* label;
     int   address;
 };
-typedef struct _LabelEntry LabelEntry;
+typedef struct _LEntry LEntry;
 
 
-struct _LabelTable{
-    LabelEntry *entries;
+struct _LTable{
+    LEntry *entries;
     int cap;
     int numLab;
     
 };
-typedef struct _LabelTable LabelTable;
+typedef struct _LTable LTable;
 
 
-void tableDef(LabelTable* table);
+void tableDef(LTable* table);
 
-int resize(LabelTable* table, int newSize);
+int resize(LTable* table, int newSize);
 
-int addLab(LabelTable* table, char* labelName, int memLoc);
+int addLab(LTable* table, char* labelName, int memLoc);
 
-int getLab(LabelTable* table, char* label);
+int getLab(LTable* table, char* label);
 
 #endif
