@@ -22,6 +22,7 @@
 // ashaza
 #include "parser.h"
 #include "table.h"
+#include "Labels.h"
 #include "ParseResult.h"
 
 /***  Add include directives for here as needed.  ***/
@@ -38,6 +39,7 @@ char* imm_to_binary(int input);
 void printByte(FILE *fp, uint32_t Byte);
 char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
+void parseTokens(char** beginToken, char** endToken);
 
 void parseFile(FILE *in, FILE *out, int pass) {
    int textAddress = 0x00000000;
@@ -305,7 +307,7 @@ char* parseASM(const char* const pASM) {
       strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
-   else if(strcmp(command, "syscall") == 0 || strcmp(command, "nop") == 0)
+   else if(strcmp(command, "nop") == 0)
    {
       result->rs = 0;
       result->RS = "00000\0";
@@ -320,6 +322,22 @@ char* parseASM(const char* const pASM) {
       strcat(holder, result->RD);
       strcat(holder, result->RS);
       strcat(holder, result->RT);
+   }
+   else if(strcmp(command, "syscall") == 0 )
+   {
+      result->rs = 0;
+      result->RS = "00000\0";
+
+      result->rd = 0;
+      result->RD = "00000\0";
+
+      result->rt = 0;
+      result->RT = "00000\0";
+
+      strcat(holder, result->RD);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->Opcode);
    }
 
    return holder;
@@ -422,4 +440,51 @@ char* stringToBinary(char* str)
 		}
 	}
 	return bin;
+}
+
+//parses the token and ignores white space
+void parseTokens(char** beginToken, char** endToken)
+{
+   //checks to make sure the tokens are made
+   if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)
+   {
+      return 0;
+   }
+
+   //goes until no whitespace
+   while (**beginToken != '\0')
+   {
+      if(isspace(**beginToken))
+      {
+         (*beginToken) += 1;
+      }
+      else
+      {
+         break;
+      }
+   }
+
+   //if is a blank row than set end to front
+   if(**beginToken == '\0')
+   {
+      *endToken = *beginToken;
+   }
+
+   //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
+   *endToken = *beginToken + 1;
+   if (*beginToken == ".")
+   {
+      while(!isspace (**endToken))
+      {
+         
+      }
+   }
+   else
+   {
+      while(**endToken != ":" || **endToken != "\0")
+      {
+         (*endToken) += 1;
+      }
+   }
+   
 }
