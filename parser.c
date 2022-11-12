@@ -40,6 +40,7 @@ void printByte(FILE *fp, uint32_t Byte);
 char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
+LTable preProcessLables(char* FILENAME);
 
 void parseFile(FILE *in, FILE *out, int pass) {
    int textAddress = 0x00000000;
@@ -472,19 +473,64 @@ void parseTokens(char** beginToken, char** endToken)
 
    //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
    *endToken = *beginToken + 1;
-   if (*beginToken == ".")
+   if (**beginToken == '.')
    {
       while(!isspace (**endToken))
       {
-         
+         (*endToken) += 1;
       }
    }
    else
    {
-      while(**endToken != ":" || **endToken != "\0")
+      while(**endToken != ':' && **endToken != '\0')
       {
          (*endToken) += 1;
       }
    }
    
+}
+
+//loops through and preprocesses the labels into the table
+LTable preProcessLables(FILE* ptr)
+{
+   LTable tab;
+   tableDef(&tab);
+   resize(&tab, 15);
+
+   char* startToken;
+   char* endToken;
+   int addr = 0;
+
+   char instruction[256];
+
+   while(fgets(instruction, 256, ptr))
+   {
+      //checks for comments either at the start or after instructions
+      if(*instruction == '#')
+      {
+         continue;
+      }
+      else{
+         strtok(instruction, "#");
+      }
+
+      startToken = instruction;
+      endToken = startToken;
+      parseTokens(&startToken, &endToken);
+
+      if(*endToken == ':')
+      {
+         *endToken = '\0';
+         if(getLab(&tab, startToken) == 0)
+         {
+            addLab(&tab, startToken, addr);
+         }
+      }
+
+      addr += 4;
+      startToken = endToken + 1;
+      parseTokens(&startToken, &endToken);
+      *endToken = '\0';
+   }
+   return tab;
 }
