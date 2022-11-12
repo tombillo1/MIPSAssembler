@@ -25,8 +25,8 @@ void tableDef(LTable* table);
 
 bool resize(LTable* table, int newSize);
 
-int addLab(LTable* table, char* labelName, int memLoc);
+bool addLab(LTable* table, char* labelName, int memLoc);
 
-bool getLab(LTable* table, char* label);
+int getLab(LTable* table, char* label);
 
 #endif
