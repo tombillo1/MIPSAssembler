@@ -1,7 +1,9 @@
+
 #ifndef LABEL_H
 #define LABEL_H
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 struct _LEntry{
     char* label;
@@ -21,10 +23,10 @@ typedef struct _LTable LTable;
 
 void tableDef(LTable* table);
 
-int resize(LTable* table, int newSize);
+bool resize(LTable* table, int newSize);
 
 int addLab(LTable* table, char* labelName, int memLoc);
 
-int getLab(LTable* table, char* label);
+bool getLab(LTable* table, char* label);
 
 #endif
