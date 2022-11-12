@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <stdbool.h>
 #include "Labels.h"
 
 //defines table entries, number of labels and capacity
@@ -13,7 +13,7 @@ void tableDef (LTable* table)
 }
 
 //resizes the label to the correct size
-int resize(LTable* table, int updSize)
+bool resize(LTable* table, int updSize)
 {
     LEntry* newList = malloc(updSize * sizeof(LEntry));
 
@@ -22,7 +22,7 @@ int resize(LTable* table, int updSize)
     
     if ( table == NULL || newList == NULL)
     {
-        return 0;
+        return false;
     }
     
     if ( table->entries != NULL) 
@@ -43,7 +43,7 @@ int resize(LTable* table, int updSize)
     
     table->cap = updSize;
     table->entries = newList;
-    return 1;
+    return true;
 }
 
 //gets the label from the table
@@ -59,21 +59,21 @@ int getLab (LTable* table, char* label)
         }
         temp++;
     }
-    return -1;
+    return 0;
     
 }
 
 //adds a table to the table
-int addLab (LTable* table, char* label, int addr)
+bool addLab (LTable* table, char* label, int addr)
 {
     char* dup = strdup(label);
 
     if (table == NULL || dup == NULL)
     {
-        return 0;
+        return false;
     } 
 
-    if(getLab(table, label) == -1)
+    if(getLab(table, label) == 0)
     {
         if(table->cap <= table->numLab)
         {
@@ -85,5 +85,5 @@ int addLab (LTable* table, char* label, int addr)
         newEntry->address = addr;
         newEntry->label = dup;
     }
-    return 1;               
+    return true;               
 }
