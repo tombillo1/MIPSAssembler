@@ -8,5 +8,6 @@ void printByte(FILE *fp, uint32_t Byte);
 char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
+LTable preProcessLables(FILE* ptr);
 
 #endif
