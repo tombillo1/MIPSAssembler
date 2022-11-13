@@ -38,64 +38,8 @@ char* reg_to_binary(int val);
 char* imm_to_binary(int input);
 void printByte(FILE *fp, uint32_t Byte);
 char* stringToBinary(char* str);
-void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
 LTable preProcessLables(char* FILENAME);
-
-void parseFile(FILE *in, FILE *out, int pass) {
-   int textAddress = 0x00000000;
-   int dataAddress = 0x00002000;
-   int sizeAddresses = 1;
-   bool checkData = false;
-   int index;
-   char *label;
-
-   // Iterate line by line
-    // Pass line to ParseResult
-    char line[256];
-
-    while (fgets(line, sizeof(line), in)) {
-        index = 0;
-
-        // Check if the line is commented
-        if (line[0] == '#') {
-            continue;
-        }
-
-        // Checking the labels declared in .data
-        if (checkData) {
-            if (line[0] == '.' && line[1] == 't') {
-                checkData = false;
-                continue;
-            }
-
-            // add the label to the array
-            for (int i = 0; i < sizeof(line); i++) {
-                if (line[i] == ':') {
-                    index = i;
-                    break;
-                }
-            }
-            
-            // MAYBE HAVE TO FREE
-            label = calloc(index, sizeof(char));
-
-            //Store string label name 
-            strncpy(label, line, index);
-            
-
-            //Add to label table
-
-            dataAddress++;
-        }
-
-        if (line[0] == '.' && line[1] == 'd') {
-            checkData = true;
-            continue;
-        }
-
-    }
-}
 
 
 char* parseASM(const char* const pASM) {
@@ -500,6 +444,8 @@ LTable preProcessLables(FILE* ptr)
    char* startToken;
    char* endToken;
    int addr = 0;
+   bool inDataSegment = false;
+   int dataAddr = 2000;
 
    char instruction[256];
 
@@ -509,6 +455,12 @@ LTable preProcessLables(FILE* ptr)
       if(*instruction == '#')
       {
          continue;
+      }
+      else if (*instruction == '.' && *instruction + 1 == 'd') {
+         inDataSegment = true;
+      }
+      else if (*instruction == '.' && *instruction + 1 == 't') {
+         inDataSegment = false;
       }
       else{
          strtok(instruction, "#");
@@ -521,13 +473,22 @@ LTable preProcessLables(FILE* ptr)
       if(*endToken == ':')
       {
          *endToken = '\0';
-         if(getLab(&tab, startToken) == 0)
+         if(getLab(&tab, startToken) == 0 && inDataSegment)
          {
+            addLab(&tab, startToken, dataAddr);
+         }
+         else if (getLab(&tab, startToken) == 0) {
             addLab(&tab, startToken, addr);
          }
       }
 
-      addr += 4;
+      if (inDataSegment) {
+         dataAddr += 4;
+      }
+      else {
+         addr += 4;
+      }
+
       startToken = endToken + 1;
       parseTokens(&startToken, &endToken);
       *endToken = '\0';
