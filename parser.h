@@ -9,5 +9,6 @@ char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
 LTable preProcessLables(FILE* ptr);
+void processLabels(FILE* fileName, FILE* outputFile, LTable tab);
 
 #endif

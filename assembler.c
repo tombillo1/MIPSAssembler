@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "parser.h"
+#include "Labels.h"
 
 int main(int argc, char *argv[]) {
     FILE* ptr;
@@ -23,10 +24,7 @@ int main(int argc, char *argv[]) {
     }
 
     //Parse the file to instatiate the labels
-    parseFile(ptr, out, 0);
-
-    //Parse the file and write to the output file
-    parseFile(ptr, out, 1);
+    LTable labelTable = preProcessLables(ptr);
  
     // Closing the file
     fclose(ptr);
