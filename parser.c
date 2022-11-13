@@ -539,11 +539,13 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
       }
       else if (endToken == ':') {
          //process for the data segment
+         continue;
       }
 
       char* result = parseASM(startToken, tab);
 
       //Add to file
+      fprintf(outputFile, "%s", result);
 
    }
 }
