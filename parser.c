@@ -447,111 +447,6 @@ char* stringToBinary(char* str)
 	return bin;
 }
 
-//parses the token and ignores white space
-void parseTokens(char** beginToken, char** endToken)
-{
-   //checks to make sure the tokens are made
-   if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)
-   {
-      return 0;
-   }
-
-   //goes until no whitespace
-   while (**beginToken != '\0')
-   {
-      if(isspace(**beginToken))
-      {
-         (*beginToken) += 1;
-      }
-      else
-      {
-         break;
-      }
-   }
-
-   //if is a blank row than set end to front
-   if(**beginToken == '\0')
-   {
-      *endToken = *beginToken;
-   }
-
-   //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
-   *endToken = *beginToken + 1;
-   if (**beginToken == '.')
-   {
-      while(!isspace (**endToken))
-      {
-         (*endToken) += 1;
-      }
-   }
-   else
-   {
-      while(**endToken != ':' && **endToken != '\0')
-      {
-         (*endToken) += 1;
-      }
-   }
-   
-}
-
-//loops through and preprocesses the labels into the table
-//first pass
-LTable preProcessLables(FILE* ptr)
-{
-   LTable tab;
-   tableDef(&tab);
-
-   char* startToken;
-   char* endToken;
-   int addr = 0;
-   bool inDataSegment = false;
-   int dataAddr = 2000;
-
-   char instruction[256];
-
-   while(fgets(instruction, 256, ptr))
-   {
-      //checks for comments either at the start or after instructions
-      if(*instruction == '#')
-      {
-         continue;
-      }
-      else if (*instruction == '.' && *instruction + 1 == 'd') {
-         inDataSegment = true;
-      }
-      else if (*instruction == '.' && *instruction + 1 == 't') {
-         inDataSegment = false;
-      }
-      else{
-         strtok(instruction, "#");
-      }
-
-      startToken = instruction;
-      endToken = startToken;
-      parseTokens(&startToken, &endToken);
-
-      if(*endToken == ':')
-      {
-         *endToken = '\0';
-         if(getLab(&tab, startToken) == 0 && inDataSegment)
-         {
-            addLab(&tab, startToken, dataAddr);
-         }
-         else if (getLab(&tab, startToken) == 0) {
-            addLab(&tab, startToken, addr);
-         }
-      }
-
-      if (inDataSegment) {
-         dataAddr += 4;
-      }
-      else {
-         addr += 4;
-      }
-   }
-   return tab;
-}
-
 //2nd pass which should handle the .data and .text segments as well as all instructions and labels
 void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
 {
@@ -655,6 +550,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile)
   //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
   
   int holder = 0;
+  char* str;
   while(**endToken != '\0')
   {
     if(isspace (**endToken))
@@ -663,7 +559,8 @@ void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile)
     }
     else if(**endToken == ',')
     {
-      fprintf(outputFile, holder);
+      str = imm_to_binary(holder);
+      fprintf(outputFile, str);
       holder = 0;
       (*endToken) += 1;
     }
@@ -685,6 +582,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile)
     }
   }
   //printf("Val: %d", holder);
+  str = imm_to_binary(holder);
   fprintf(outputFile, holder);
 }
 
