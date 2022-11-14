@@ -44,6 +44,7 @@ void parseTokens(char** beginToken, char** endToken);
 LTable preProcessLables(FILE* ptr);
 void processLabels(FILE *fileName, FILE *outputFile, LTable tab);
 void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile);
+char* parseLast(char** beginToken, char** endToken);
 
 void parseFile(FILE *in, FILE *out, int pass) {
    int textAddress = 0x00000000;
@@ -602,12 +603,11 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
          //in a .asciiz segment
          else if(startToken+1 == 'a')
          {
-            //THIS DOES NOT WORK YET
             startToken = endToken +1;
             endToken = startToken;
-            parseTokens(&startToken, &endToken);
-            char* temp = stringToBinary(startToken);
-            fprintf(outputFile, temp);
+            char* temp = parseLast(&startToken, &endToken);
+            char* str = stringToBinary(temp);
+            fprintf(outputFile, str);
          }
       }
 
@@ -681,6 +681,67 @@ void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile)
   //printf("Val: %d", holder);
   fprintf(outputFile, holder);
 }
+
+//parses the last instructions
+// it could either work for .asciiz or an instruction
+char* parseLast(char** beginToken, char** endToken)
+{
+   //checks to make sure the tokens are made
+   if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)
+   {
+      return 0;
+   }
+
+   //goes until no whitespace
+   while (**beginToken != '\0')
+   {
+      if(isspace(**beginToken))
+      {
+         (*beginToken) += 1;
+      }
+      else
+      {
+         break;
+      }
+   }
+  
+   int count = 2;
+   //if is a blank row than set end to front
+   if(**beginToken == '\0')
+   {
+      *endToken = *beginToken;
+   }
+
+   //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
+   *endToken = *beginToken + 1;
+   if (**beginToken == '.')
+   {
+      while(!isspace (**endToken))
+      {
+         (*endToken) += 1;
+      }
+   }
+   else
+   {
+      while(**endToken != ':' && **endToken != '\0')
+      {
+         (*endToken) += 1;
+         count++;
+      }
+   }
+   
+   char* result = (char*) malloc(sizeof(char) * (count + 1));
+   char* tempResult = result;
+   
+   for(int i = 0; i < count; i++)
+   {
+      *tempResult = **beginToken;
+      tempResult++;
+      (*beginToken)++;
+   }
+   return result;
+}
+
 
 //gets the next token in the  line
 void parseTokens(char** beginToken, char** endToken)
