@@ -44,6 +44,7 @@ char* getArg2(char* check);
 char* getArg3(char* check);
 char* getOper(char* check);
 char* getFunct(char* check);
+char* getValue(char* check);
 
 typedef struct _RegMapping RegMapping;
 typedef struct _SpecialFunctionMapping SpecialFunctMapping;

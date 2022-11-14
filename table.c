@@ -30,6 +30,7 @@
 #include <stdint.h>
 
 #define INSTRUCTIONSIZE 25
+#define REGISTERSIZE 27
 
 static RegMapping RegMappings[] = {
     {"$zero", "00000"},
@@ -161,4 +162,12 @@ char* getFunct(char* check) {
         }
     }
     return NULL;
+}
+
+char* getValue(char* check) {
+	for (int i = 0; i < REGISTERSIZE; i++) {
+		if (strcmp(RegMappings[i].regName, check) == 0) {
+			return RegMappings[i].regNumber;
+			}
+		}
 }

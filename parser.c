@@ -20,10 +20,9 @@
 // tommybillington
 // Ashaz Ahmed
 // ashaza
-#include "parser.h"
-#include "table.h"
-#include "Labels.h"
-#include "ParseResult.h"
+//#include "table.h"
+//#include "Labels.h"
+//#include "ParseResult.h"
 
 /***  Add include directives for here as needed.  ***/
 
@@ -33,16 +32,18 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "parser.h"
+#include "table.h";
 
 char* reg_to_binary(int val);
 char* imm_to_binary(int input);
 void printByte(FILE *fp, uint32_t Byte);
-char* parseASM(const char* const pASM);
+char* parseASM(const char* const pASM, LTable* tab);
 char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
-LTable preProcessLables(FILE* ptr);
-void processLabels(FILE *fileName, FILE *outputFile, LTable tab);
+LTable* preProcessLables(FILE* ptr);
+void processLabels(FILE *fileName, FILE *outputFile, LTable* tab);
 void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile);
 char* parseLast(char** beginToken, char** endToken);
 
@@ -102,7 +103,7 @@ void parseFile(FILE *in, FILE *out, int pass) {
 }
 
 
-char* parseASM(const char* const pASM) {
+char* parseASM(const char* const pASM, LTable* tab) {
 	
    char* holder = "";
 
@@ -447,8 +448,66 @@ char* stringToBinary(char* str)
 	return bin;
 }
 
+//loops through and preprocesses the labels into the table
+//first pass
+LTable* preProcessLables(FILE* ptr)
+{
+   LTable tab;
+   tableDef(&tab);
+
+   char* startToken;
+   char* endToken;
+   int addr = 0;
+   bool inDataSegment = false;
+   int dataAddr = 2000;
+
+   char instruction[256];
+
+   while(fgets(instruction, 256, ptr))
+   {
+      //checks for comments either at the start or after instructions
+      if(*instruction == '#')
+      {
+         continue;
+      }
+      else if (*instruction == '.' && *instruction + 1 == 'd') {
+         inDataSegment = true;
+      }
+      else if (*instruction == '.' && *instruction + 1 == 't') {
+         inDataSegment = false;
+      }
+      else{
+         strtok(instruction, "#");
+      }
+
+      startToken = instruction;
+      endToken = startToken;
+      parseTokens(&startToken, &endToken);
+
+      if(*endToken == ':')
+      {
+         *endToken = '\0';
+         if(getLab(&tab, startToken) == 0 && inDataSegment)
+         {
+            addLab(&tab, startToken, dataAddr);
+         }
+         else if (getLab(&tab, startToken) == 0) {
+            addLab(&tab, startToken, addr);
+         }
+      }
+
+      if (inDataSegment) {
+         dataAddr += 4;
+      }
+      else {
+         addr += 4;
+      }
+   }
+   return &tab;
+}
+
 //2nd pass which should handle the .data and .text segments as well as all instructions and labels
-void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
+void processLabels(FILE *fileName, FILE *outputFile, LTable* tab)
 {
    char *startToken;
    char *endToken;
@@ -646,7 +705,6 @@ char* parseLast(char** beginToken, char** endToken)
    return result;
 }
 
-
 //gets the next token in the  line
 void parseTokens(char** beginToken, char** endToken)
 {
@@ -693,3 +751,4 @@ void parseTokens(char** beginToken, char** endToken)
    }
    
 }
+

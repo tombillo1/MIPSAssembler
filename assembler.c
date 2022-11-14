@@ -3,9 +3,6 @@
 #include "parser.h"
 #include "Labels.h"
 
-LTable preProcessLables(FILE* ptr);
-void processLabels(FILE *fileName, FILE *outputFile, LTable tab);
-
 int main(int argc, char *argv[]) {
     FILE* ptr;
     FILE* out;
