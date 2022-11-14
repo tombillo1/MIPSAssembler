@@ -10,12 +10,13 @@ int main(int argc, char *argv[]) {
  
     // Opening file in reading mode
     ptr = fopen(argv[0], "r");
-    // Output file
-    out = fopen(argv[1], "w");
- 
+    
     if (NULL == ptr) {
         printf("file can't be opened \n");
     }
+    
+    // Output file
+    out = fopen(argv[1], "w");
 
     // exiting program 
     if (out == NULL) {
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    LTable* tab = preProcessLables(ptr);
+    LTable* tab = preProcessLables(&ptr);
 
     if(argv[2] == "-symbols")
     {

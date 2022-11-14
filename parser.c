@@ -42,7 +42,7 @@ char* parseASM(const char* const pASM, LTable* tab);
 char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
-LTable* preProcessLables(FILE* ptr);
+LTable* preProcessLables(FILE** ptr);
 void processLabels(FILE *fileName, FILE *outputFile, LTable* tab);
 void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile);
 char* parseLast(char** beginToken, char** endToken);
@@ -450,7 +450,7 @@ char* stringToBinary(char* str)
 
 //loops through and preprocesses the labels into the table
 //first pass
-LTable* preProcessLables(FILE* ptr)
+LTable* preProcessLables(FILE** ptr)
 {
    LTable tab;
    tableDef(&tab);
@@ -463,7 +463,7 @@ LTable* preProcessLables(FILE* ptr)
 
    char instruction[256];
 
-   while(fgets(instruction, 256, ptr))
+   while(fgets(instruction, 256, *ptr) != NULL)
    {
       //checks for comments either at the start or after instructions
       if(*instruction == '#')
@@ -573,6 +573,7 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable* tab)
       else{
          char* result = parseASM(startToken, tab);
          fprintf(outputFile, result);
+         free(result);
       }
 
    }

@@ -10,7 +10,7 @@ char* stringToBinary(char* str);
 void parseFile(FILE *in, FILE *out, int pass);
 void parseTokens(char** beginToken, char** endToken);
 char* parseASM(const char* const pASM, LTable* tab);
-LTable* preProcessLables(FILE* ptr);
+LTable* preProcessLables(FILE** ptr);
 void processLabels(FILE *fileName, FILE *outputFile, LTable* tab);
 char* parseLast(char** beginToken, char** endToken);
 
