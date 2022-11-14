@@ -476,23 +476,23 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
       endToken = startToken;
       parseTokens(&startToken, &endToken);
 
-      if (endToken == ':' && !inDataSegment) {
+      if (*endToken == ':' && !inDataSegment) {
          continue;
       }
-      else if (endToken == ':') {
+      else if (*endToken == ':') {
          startToken = endToken +1;
          endToken = startToken;
          parseTokens(&startToken, &endToken);
 
          //in a .word segment
-         if(startToken+1 == 'w')
+         if(*(startToken+1) == 'w')
          {
             startToken = endToken +1;
             endToken = startToken;
             parseWordSeg(&startToken, &endToken, &outputFile);
          }
          //in a .asciiz segment
-         else if(startToken+1 == 'a')
+         else if(*(startToken+1) == 'a')
          {
             startToken = endToken +1;
             endToken = startToken;
