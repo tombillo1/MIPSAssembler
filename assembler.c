@@ -1,7 +1,10 @@
 #include <stdio.h>
-
+#include <string.h>
 #include "parser.h"
 #include "Labels.h"
+
+LTable preProcessLables(FILE* ptr);
+void processLabels(FILE *fileName, FILE *outputFile, LTable tab);
 
 int main(int argc, char *argv[]) {
     FILE* ptr;
@@ -23,8 +26,21 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    //Parse the file to instatiate the labels
-    LTable labelTable = preProcessLables(ptr);
+    LTable* tab = preProcessLables(ptr);
+
+    if(argv[2] == "-symbols")
+    {
+        int numLabels = getEntries(tab);
+        LEntry* entry = tab->entries;
+        for(int i = 0; i < numLabels; i++)
+        {
+            printf("%x\t%s", entry->address, entry->label);
+            entry++;
+        }
+    }
+    else{
+        processLabels(ptr, out, tab);
+    }
  
     // Closing the file
     fclose(ptr);
