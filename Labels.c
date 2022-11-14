@@ -87,3 +87,9 @@ bool addLab (LTable* table, char* label, int addr)
     }
     return true;               
 }
+
+//returns number of labels
+int getEntries(LTable* table)
+{
+    return table->entries;
+}
