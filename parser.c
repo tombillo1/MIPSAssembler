@@ -35,74 +35,6 @@
 #include "parser.h"
 #include "table.h";
 
-char* reg_to_binary(int val);
-char* imm_to_binary(int input);
-void printByte(FILE *fp, uint32_t Byte);
-char* parseASM(const char* const pASM, LTable* tab);
-char* stringToBinary(char* str);
-void parseFile(FILE *in, FILE *out, int pass);
-void parseTokens(char** beginToken, char** endToken);
-LTable* preProcessLables(FILE** ptr);
-void processLabels(FILE *fileName, FILE *outputFile, LTable* tab);
-void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile);
-char* parseLast(char** beginToken, char** endToken);
-
-void parseFile(FILE *in, FILE *out, int pass) {
-   int textAddress = 0x00000000;
-   int dataAddress = 0x00002000;
-   int sizeAddresses = 1;
-   bool checkData = false;
-   int index;
-   char *label;
-
-   // Iterate line by line
-    // Pass line to ParseResult
-    char line[256];
-
-    while (fgets(line, sizeof(line), in)) {
-        index = 0;
-
-        // Check if the line is commented
-        if (line[0] == '#') {
-            continue;
-        }
-
-        // Checking the labels declared in .data
-        if (checkData) {
-            if (line[0] == '.' && line[1] == 't') {
-                checkData = false;
-                continue;
-            }
-
-            // add the label to the array
-            for (int i = 0; i < sizeof(line); i++) {
-                if (line[i] == ':') {
-                    index = i;
-                    break;
-                }
-            }
-            
-            // MAYBE HAVE TO FREE
-            label = calloc(index, sizeof(char));
-
-            //Store string label name 
-            strncpy(label, line, index);
-            
-
-            //Add to label table
-
-            dataAddress++;
-        }
-
-        if (line[0] == '.' && line[1] == 'd') {
-            checkData = true;
-            continue;
-        }
-
-    }
-}
-
-
 char* parseASM(const char* const pASM, LTable* tab) {
 	
    char* holder = "";
@@ -450,7 +382,7 @@ char* stringToBinary(char* str)
 
 //loops through and preprocesses the labels into the table
 //first pass
-LTable* preProcessLables(FILE** ptr)
+LTable* preProcessLables(FILE* ptr)
 {
    LTable tab;
    tableDef(&tab);
@@ -461,19 +393,19 @@ LTable* preProcessLables(FILE** ptr)
    bool inDataSegment = false;
    int dataAddr = 2000;
 
-   char instruction[256];
+   char* instruction = calloc(256, sizeof(char));
 
-   while(fgets(instruction, 256, *ptr) != NULL)
+   while(fgets(instruction, 256, ptr) != NULL)
    {
       //checks for comments either at the start or after instructions
-      if(*instruction == '#')
+      if(*instruction == '#' || *instruction == '\n')
       {
          continue;
       }
-      else if (*instruction == '.' && *instruction + 1 == 'd') {
+      else if (*instruction == '.' && *(instruction + 1) == 'd') {
          inDataSegment = true;
       }
-      else if (*instruction == '.' && *instruction + 1 == 't') {
+      else if (*instruction == '.' && *(instruction + 1) == 't') {
          inDataSegment = false;
       }
       else{
@@ -503,17 +435,20 @@ LTable* preProcessLables(FILE** ptr)
          addr += 4;
       }
    }
+   
+   free(instruction);
+   
    return &tab;
 }
 
 //2nd pass which should handle the .data and .text segments as well as all instructions and labels
-void processLabels(FILE *fileName, FILE *outputFile, LTable* tab)
+void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
 {
    char *startToken;
    char *endToken;
    bool inDataSegment = false;
 
-   char instruction[256];
+   char* instruction = calloc(256, sizeof(char));
 
    while (fgets(instruction, 256, fileName))
    {
@@ -524,7 +459,7 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable* tab)
       }
       else if(*instruction == '\n')
       {
-         fprintf(outputFile, "00000000000000000000000000000000");
+         fprintf(outputFile, "00000000000000000000000000000000\n");
       }
       else if (*instruction == '.' && *instruction + 1 == 'd')
       {
@@ -580,7 +515,7 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable* tab)
 }
 
 //parses the .word seg and deals with arrays, len of word, etc.
-void parseWordSeg(char** beginToken, char** endToken, FILE *outputFile)
+void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
 {
   //checks to make sure the tokens are made
   if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)

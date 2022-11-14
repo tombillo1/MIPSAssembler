@@ -9,14 +9,14 @@ int main(int argc, char *argv[]) {
 
  
     // Opening file in reading mode
-    ptr = fopen(argv[0], "r");
+    ptr = fopen(argv[1], "r");
     
     if (NULL == ptr) {
         printf("file can't be opened \n");
     }
     
     // Output file
-    out = fopen(argv[1], "w");
+    out = fopen(argv[2], "w");
 
     // exiting program 
     if (out == NULL) {
@@ -24,9 +24,12 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    LTable* tab = preProcessLables(&ptr);
-
-    if(argv[2] == "-symbols")
+    LTable* tab = preProcessLables(ptr);
+    
+    char s[] = "-symbols";
+    
+    /**
+    if (strcmp(argv[3], s) == 0) //CHANGE TO strcmp()
     {
         int numLabels = getEntries(tab);
         LEntry* entry = tab->entries;
@@ -36,9 +39,10 @@ int main(int argc, char *argv[]) {
             entry++;
         }
     }
-    else{
+    */
+    //else{
         processLabels(ptr, out, tab);
-    }
+    //}
  
     // Closing the file
     fclose(ptr);
