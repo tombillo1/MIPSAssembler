@@ -568,13 +568,19 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
       {
          continue;
       }
+      else if(*instruction == '\n')
+      {
+         fprintf(outputFile, "00000000000000000000000000000000");
+      }
       else if (*instruction == '.' && *instruction + 1 == 'd')
       {
          inDataSegment = true;
+         continue;
       }
       else if (*instruction == '.' && *instruction + 1 == 't')
       {
          inDataSegment = false;
+         continue;
       }
       else
       {
@@ -610,10 +616,10 @@ void processLabels(FILE *fileName, FILE *outputFile, LTable tab)
             fprintf(outputFile, str);
          }
       }
-
-      char* result = parseASM(startToken, tab);
-
-      //Add to file
+      else{
+         char* result = parseASM(startToken, tab);
+         fprintf(outputFile, result);
+      }
 
    }
 }
