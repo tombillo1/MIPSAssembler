@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
     }
     */
     //else{
+		fclose(ptr);
+		ptr = fopen(argv[1], "r");
         processLabels(ptr, out, tab);
     //}
  

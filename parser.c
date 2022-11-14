@@ -450,23 +450,19 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
 
    char* instruction = calloc(256, sizeof(char));
 
-   while (fgets(instruction, 256, fileName))
+   while (fgets(instruction, 256, fileName) != NULL)
    {
       // checks for comments either at the start or after instructions
-      if (*instruction == '#')
+      if (*instruction == '#' || *instruction == '\n')
       {
          continue;
       }
-      else if(*instruction == '\n')
-      {
-         fprintf(outputFile, "00000000000000000000000000000000\n");
-      }
-      else if (*instruction == '.' && *instruction + 1 == 'd')
+      else if (*instruction == '.' && *(instruction + 1) == 'd')
       {
          inDataSegment = true;
          continue;
       }
-      else if (*instruction == '.' && *instruction + 1 == 't')
+      else if (*instruction == '.' && *(instruction + 1) == 't')
       {
          inDataSegment = false;
          continue;
@@ -508,7 +504,6 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
       else{
          char* result = parseASM(startToken, tab);
          fprintf(outputFile, result);
-         free(result);
       }
 
    }
