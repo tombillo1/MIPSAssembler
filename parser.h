@@ -11,5 +11,6 @@ void parseTokens(char** beginToken, char** endToken);
 char* parseASM(const char* const pASM);
 LTable preProcessLables(FILE* ptr);
 void processLabels(FILE *fileName, FILE *outputFile, LTable tab);
+char* parseLast(char** beginToken, char** endToken);
 
 #endif
