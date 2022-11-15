@@ -72,7 +72,7 @@ struct instructionFormat instructionFormats[] = {
     {"andi", "rt", "rs", "immediate"}, // yes
     {"nor", "rd", "rs", "rt"}, // yes
     {"slti", "rt", "rs", "immediate"}, // yes
-    {"sll", "rd", "rt", "immediate"}, // yes
+    {"sll", "rd", "rt", "sa"}, // yes
     {"slt", "rd", "rs", "rt"}, // yes
     {"mul", "rd", "rs", "rt"}, // yes
     {"mult", "rs", "rt", NULL}, //change
@@ -88,7 +88,7 @@ struct instructionFormat instructionFormats[] = {
     {"j", NULL, NULL, NULL}, //change
     {"blez", "rs", "rt", "immediate"}, // yes
     {"srav", "rd", "rs", "rt"}, // yes
-    {"sra", "rd", "rs", "rt"} // yes
+    {"sra", "rd", "rt", "sa"} // yes
 };
 
 char* getArg1(char* check) {
