@@ -328,14 +328,28 @@ char* reg_to_binary(int val)
 
 char* imm_to_binary(int input)
 {
-   unsigned int val = (unsigned)input;
-   int arr[16]; //holder array
-   char* str = calloc(16, sizeof(char));
-   for (int i = 15; i >=0; i--) 
-   {
+
+    unsigned int val = (unsigned)input;
+
+    int arr[16]; //holder array
+
+    char* str = calloc(16, sizeof(char));
+
+    for (int i = 15; i >=0; i--) {
       arr[i] = val & 0x1;
       val = val >> 1;
-   }
+      }
+
+    for(int i = 0; i < 16; i++)
+    {
+      if (arr[i] == 1) {
+        str[i] = '1';
+        }
+        else {
+          str[i] = '0';
+          }
+    }
+    return str;
 }
 
 char* sa_to_binary(int input)
@@ -348,6 +362,17 @@ char* sa_to_binary(int input)
       arr[i] = val & 0x1;
       val = val >> 1;
    }
+   
+    for(int i = 0; i < 5; i++)
+    {
+      if (arr[i] == 1) {
+        str[i] = '1';
+        }
+        else {
+          str[i] = '0';
+          }
+    }
+    return str;
 }
 
 void printByte(FILE *fp, uint32_t Byte)
