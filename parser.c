@@ -193,20 +193,12 @@ char* parseASM(const char* const pASM, LTable* tab) {
    if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0)   // for sw and lw instructions
    {
       strcat(holder, result->Opcode);
-      strcat(holder, result->RT);
       strcat(holder, result->RS);
+      strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
-   else if(strcmp(result->Mnemonic, "add") == 0)
-   {
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RS);
-      strcat(holder, result->RT);
-      strcat(holder, result->RD);
-      strcat(holder, "00000");
-      strcat(holder, result->Funct);
-   }
-   else if(strcmp(result->Mnemonic, "addu") == 0 || strcmp(result->Mnemonic, "nor") == 0 || strcmp(result->Mnemonic, "and") == 0 || strcmp(result->Mnemonic, "slt") == 0 || strcmp(result->Mnemonic, "mul") == 0 || strcmp(result->Mnemonic, "sub") == 0 || strcmp(result->Mnemonic, "srav") == 0 || strcmp(result->Mnemonic, "sra") == 0) // for R type instructions
+   //THIS GOOD NO TOUCH
+   else if(strcmp(result->Mnemonic, "add") == 0 || strcmp(result->Mnemonic, "addu") == 0 || strcmp(result->Mnemonic, "nor") == 0 || strcmp(result->Mnemonic, "and") == 0 || strcmp(result->Mnemonic, "slt") == 0 || strcmp(result->Mnemonic, "mul") == 0 || strcmp(result->Mnemonic, "sub") == 0 || strcmp(result->Mnemonic, "srav") == 0) // for R type instructions
    {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
@@ -222,7 +214,7 @@ char* parseASM(const char* const pASM, LTable* tab) {
       strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
-   else if(strcmp(result->Mnemonic, "beq") == 0 || strcmp(result->Mnemonic, "bne") == 0 || strcmp(result->Mnemonic, "blez") == 0)
+   else if(strcmp(result->Mnemonic, "beq") == 0 || strcmp(result->Mnemonic, "bne") == 0)
    {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
@@ -246,7 +238,7 @@ char* parseASM(const char* const pASM, LTable* tab) {
       strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
-   else if (strcmp(command, "bgtz") == 0) 
+   else if (strcmp(command, "bgtz") == 0 || strcmp(result->Mnemonic, "blez") == 0) 
    {
       result->rs = 0;
       result->RT = "00000\0";
@@ -282,7 +274,8 @@ char* parseASM(const char* const pASM, LTable* tab) {
 
       result->rt = 0;
       result->RT = "00000\0";
-
+      
+      strcat(holder, "00000000000");
       strcat(holder, result->RD);
       strcat(holder, result->RS);
       strcat(holder, result->RT);
@@ -294,8 +287,7 @@ char* parseASM(const char* const pASM, LTable* tab) {
 //converts a number to a binary string
 char* reg_to_binary(int val)
 {
-	int num = sizeof(int) * 8;
-   char* str = malloc(num + 1);
+   char* str = calloc(8, sizeof(int));
 	int count = 0;
 	  
     for(int i = 4; i >= 0; i--)
@@ -311,46 +303,36 @@ char* reg_to_binary(int val)
 		}
 		count += 1;
     }
-    str[num] = '\0';
     return str;
 }
 
 char* imm_to_binary(int input)
+
 {
+
     unsigned int val = (unsigned)input;
-    //counter variable
-    int count = 0;
-    int arr[15]; //holder array
 
-    //string array
-    int num = sizeof(int) * 16;
-    char* str = malloc(num + 1);
+    int arr[16]; //holder array
 
-    //loops to get binary number
-    while(val > 0)
+    char* str = calloc(16, sizeof(char));
+    
+    for (int i = 15; i >=0; i--) {
+      arr[i] = val & 0x1;
+      val = val >> 1;
+      }
+
+    for(int i = 0; i < 16; i++)
+
     {
-        arr[count] = val % 2;
-        val = val/2;
-        count += 1;
+      if (arr[i] == 1) {
+        str[i] = '1';
+        }
+        else {
+          str[i] = '0';
+          }
+
     }
-    //reverses the binary number and stores in string
-    int count2 = 0;
-    for(int i = 15; i >= 0; i--)
-    {
-        str[count2] = arr[i] + '0';
-        if(str[count2] != '0' || str[count2] != '1')
-        {
-		    str[count2] = '0';
-	    }
-        count2 += 1;
-    }
-    int c = 0;
-    while(str[c] != '1' && c != 15)
-    {
-        str[c] = '0';
-        c += 1;
-    }
-   
+
     return str;
 }
 

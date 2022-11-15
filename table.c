@@ -139,7 +139,7 @@ struct instruction instructions[] = {
     {"bgtz", "000111", NULL},
     {"bne", "000101", NULL},
     {"j", "000010", NULL},
-    {"syscall", "000000", "001100"},
+    {"syscall", "001100", "000000"},
     {"lw", "100011", NULL},
     {"sw", "101011", NULL},
     {"lui", "001111", NULL},
