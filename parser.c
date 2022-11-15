@@ -181,6 +181,18 @@ char* parseASM(const char* const pASM, LTable* tab) {
 	      }
 
       }
+      else if (strcmp(val, "sa") == 0) {
+         result->Imm = atoi(curr);
+         if(curr == NULL)
+		   {
+			   result->IMM = NULL;
+	      }
+	      else
+	      {
+			   result->IMM = sa_to_binary(atoi(curr));
+	      }
+
+      }
 
       curr = strtok(NULL, ", ");
    }
@@ -197,7 +209,6 @@ char* parseASM(const char* const pASM, LTable* tab) {
       strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
-   //THIS GOOD NO TOUCH
    else if(strcmp(result->Mnemonic, "add") == 0 || strcmp(result->Mnemonic, "addu") == 0 || strcmp(result->Mnemonic, "nor") == 0 || strcmp(result->Mnemonic, "and") == 0 || strcmp(result->Mnemonic, "slt") == 0 || strcmp(result->Mnemonic, "mul") == 0 || strcmp(result->Mnemonic, "sub") == 0 || strcmp(result->Mnemonic, "srav") == 0) // for R type instructions
    {
       strcat(holder, result->Opcode);
@@ -205,6 +216,15 @@ char* parseASM(const char* const pASM, LTable* tab) {
       strcat(holder, result->RT);
       strcat(holder, result->RD);
       strcat(holder, "00000");
+      strcat(holder, result->Funct);
+   }
+   else if(strcmp(result->Mnemonic, "sra") == 0)
+   {
+      strcat(holder, result->Opcode);
+      strcat(holder, "00000");
+      strcat(holder, result->RT);
+      strcat(holder, result->RD);
+      strcat(holder, result->IMM);
       strcat(holder, result->Funct);
    }
    else if(strcmp(result->Mnemonic, "sll") == 0)
@@ -307,33 +327,27 @@ char* reg_to_binary(int val)
 }
 
 char* imm_to_binary(int input)
-
 {
-
-    unsigned int val = (unsigned)input;
-
-    int arr[16]; //holder array
-
-    char* str = calloc(16, sizeof(char));
-    
-    for (int i = 15; i >=0; i--) {
+   unsigned int val = (unsigned)input;
+   int arr[16]; //holder array
+   char* str = calloc(16, sizeof(char));
+   for (int i = 15; i >=0; i--) 
+   {
       arr[i] = val & 0x1;
       val = val >> 1;
-      }
+   }
+}
 
-    for(int i = 0; i < 16; i++)
-
-    {
-      if (arr[i] == 1) {
-        str[i] = '1';
-        }
-        else {
-          str[i] = '0';
-          }
-
-    }
-
-    return str;
+char* sa_to_binary(int input)
+{
+   unsigned int val = (unsigned)input;
+   int arr[5]; //holder array
+   char* str = calloc(5, sizeof(char));
+   for (int i = 4; i >=0; i--) 
+   {
+      arr[i] = val & 0x1;
+      val = val >> 1;
+   }
 }
 
 void printByte(FILE *fp, uint32_t Byte)
