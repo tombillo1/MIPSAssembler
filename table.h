@@ -23,7 +23,7 @@
 #include <stdlib.h>
 const struct _RegMapping {
     char* regName; // symbolic name as string
-    char* regNumber; // string for binary representation
+    int regNumber; // string for binary representation
 };
 
 const struct instruction {
@@ -44,7 +44,7 @@ char* getArg2(char* check);
 char* getArg3(char* check);
 char* getOper(char* check);
 char* getFunct(char* check);
-char* getValue(char* check);
+int getValue(char* check);
 
 typedef struct _RegMapping RegMapping;
 typedef struct _SpecialFunctionMapping SpecialFunctMapping;

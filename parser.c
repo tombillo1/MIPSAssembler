@@ -158,6 +158,12 @@ char* parseASM(const char* const pASM, LTable* tab) {
       }
       else if (strcmp(val, "rt") == 0) 
       {
+		  char *temp = strchr(curr, '\n');
+		  
+		  if (temp) {
+			  *temp = '\0';
+			  }
+			  
          result->rtName = curr;
          result->rt = getValue(curr);
          if(curr == NULL)
@@ -375,17 +381,6 @@ char* sa_to_binary(int input)
     return str;
 }
 
-void printByte(FILE *fp, uint32_t Byte)
-{
-    uint32_t Mask = 0x80000000;
-
-    for (int bit = 32; bit > 0; bit--)
-    {
-        fprintf(fp, "%c", ((Byte & Mask) == 0 ? '0' : '1'));
-        Mask = Mask >> 1;
-    }
-}
-
 char* stringToBinary(char* str) 
 {
 	if(str == NULL){
@@ -529,13 +524,13 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
             endToken = startToken;
             char* temp = parseLast(&startToken, &endToken);
             char* str = stringToBinary(temp);
-            fprintf(outputFile, "\n%s", str);
+            fprintf(outputFile, "%s\n", str);
             free(str);
          }
       }
       else{
          char* result = parseASM(startToken, tab);
-         fprintf(outputFile, "\n%s",result);
+         fprintf(outputFile, "%s\n",result);
          free(result);
       }
 
@@ -583,7 +578,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
     else if(**endToken == ',')
     {
       str = imm_to_binary(holder);
-      fprintf(outputFile,"\n%s", str);
+      fprintf(outputFile,"%s\n", str);
       free(str);
       holder = 0;
       (*endToken) += 1;
@@ -607,7 +602,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
   }
   //printf("Val: %d", holder);
   str = imm_to_binary(holder);
-  fprintf(outputFile, "\n%s",holder);
+  fprintf(outputFile, "%s\n",holder);
   free(str);
 }
 
