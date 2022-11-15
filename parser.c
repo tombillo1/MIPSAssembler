@@ -381,6 +381,29 @@ char* sa_to_binary(int input)
     return str;
 }
 
+char* word_to_binary(int input)
+{
+   unsigned int val = (unsigned)input;
+   int arr[32]; //holder array
+   char* str = calloc(32, sizeof(char));
+   for (int i = 31; i >=0; i--) 
+   {
+      arr[i] = val & 0x1;
+      val = val >> 1;
+   }
+   
+    for(int i = 0; i < 32; i++)
+    {
+      if (arr[i] == 1) {
+        str[i] = '1';
+        }
+        else {
+          str[i] = '0';
+          }
+    }
+    return str;
+}
+
 char* stringToBinary(char* str) 
 {
 	if(str == NULL){
@@ -515,7 +538,7 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
          {
             startToken = endToken +1;
             endToken = startToken;
-            parseWordSeg(&startToken, &endToken, &outputFile);
+            parseWordSeg(&startToken, &endToken, outputFile);
          }
          //in a .asciiz segment
          else if(*(startToken+1) == 'a')
@@ -577,7 +600,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
     }
     else if(**endToken == ',')
     {
-      str = imm_to_binary(holder);
+      str = word_to_binary(holder);
       fprintf(outputFile,"%s\n", str);
       free(str);
       holder = 0;
@@ -601,8 +624,8 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
     }
   }
   //printf("Val: %d", holder);
-  str = imm_to_binary(holder);
-  fprintf(outputFile, "%s\n",holder);
+  str = word_to_binary(holder);
+  fprintf(outputFile,"%s\n", str);
   free(str);
 }
 
