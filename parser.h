@@ -5,6 +5,7 @@
 
 char* reg_to_binary(int val);
 char* imm_to_binary(int input);
+char* word_to_binary(int input);
 char* stringToBinary(char* str);
 void parseTokens(char** beginToken, char** endToken);
 char* parseASM(const char* const pASM, LTable* tab);
