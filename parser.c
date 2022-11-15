@@ -528,7 +528,47 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
       if (*endToken == ':' && !inDataSegment) {
          continue;
       }
-      else if (*endToken == ':') {
+      else{
+         char* result = parseASM(startToken, tab);
+         fprintf(outputFile, "%s\n",result);
+         free(result);
+      }
+
+   }
+
+   fseek(fileName, 0, SEEK_SET);
+
+   while (fgets(instruction, 256, fileName) != NULL)
+   {
+      // checks for comments either at the start or after instructions
+      if (*instruction == '#' || *instruction == '\n')
+      {
+         continue;
+      }
+      else if (*instruction == '.' && *(instruction + 1) == 'd')
+      {
+         inDataSegment = true;
+         continue;
+      }
+      else if (*instruction == '.' && *(instruction + 1) == 't')
+      {
+         break;
+      }
+      else
+      {
+         strtok(instruction, "#");
+      }
+
+      if(inDataSegment)
+      {
+         fprintf(outputFile, "\n");
+      }
+
+      startToken = instruction;
+      endToken = startToken;
+      parseTokens(&startToken, &endToken);
+
+      if (*endToken == ':' && inDataSegment) {
          startToken = endToken +1;
          endToken = startToken;
          parseTokens(&startToken, &endToken);
@@ -552,9 +592,7 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
          }
       }
       else{
-         char* result = parseASM(startToken, tab);
-         fprintf(outputFile, "%s\n",result);
-         free(result);
+         break;
       }
 
    }
