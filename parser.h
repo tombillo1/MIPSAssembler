@@ -11,8 +11,9 @@ void parseTokens(char** beginToken, char** endToken);
 char* parseASM(const char* const pASM, LTable* tab);
 LTable* preProcessLables(FILE* ptr);
 void processLabels(FILE* fileName, FILE* outputFile, LTable* tab);
-void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile);
+int parseWordSeg(char** beginToken, char** endToken, FILE* outputFile);
 char* parseLast(char** beginToken, char** endToken);
 char* sa_to_binary(int input);
+int parseWordSegPre(char** beginToken, char** endToken);
 
 #endif
