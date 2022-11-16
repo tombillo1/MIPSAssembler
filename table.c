@@ -82,7 +82,7 @@ struct instructionFormat instructionFormats[] = {
     {"mul", "rd", "rs", "rt"}, // yes
     {"mult", "rs", "rt", NULL}, //change
     {"beq", "rs", "rt", "label"}, // yes
-    {"bne", "rs", "rt", "immediate"}, // yes
+    {"bne", "rs", "rt", "label"}, // yes
     {"bgtz", "rs", "immediate", NULL}, // yes
     {"lw", "rt", "offset", NULL}, // yes
     {"sw", "rt", "offset", NULL}, // yes

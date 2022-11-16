@@ -8,7 +8,7 @@ char* imm_to_binary(int input);
 char* word_to_binary(int input);
 char* stringToBinary(char* str);
 void parseTokens(char** beginToken, char** endToken);
-char* parseASM(const char* const pASM, LTable* tab);
+char* parseASM(const char* const pASM, LTable* tab, int count);
 LTable* preProcessLables(FILE* ptr);
 void processLabels(FILE* fileName, FILE* outputFile, LTable* tab);
 int parseWordSeg(char** beginToken, char** endToken, FILE* outputFile);

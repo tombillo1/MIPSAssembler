@@ -528,6 +528,7 @@ LTable* preProcessLables(FILE* ptr)
          }
          else if (getLab(tab, startToken) == 0) {
             addLab(tab, startToken, addr);
+            continue;
          }
       }
 
@@ -565,7 +566,7 @@ LTable* preProcessLables(FILE* ptr)
          dataAddr += 4;
          addrPlus = 0;
       }
-      else if (inTextSegment && *endToken != ':') {
+      else if (inTextSegment) {
          addr += 4;
       }
    }

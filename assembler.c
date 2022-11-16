@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
 
     LTable* tab = preProcessLables(ptr);
     
+    char s[] = "-symbols";
+    
     if (argc > 3) //CHANGE TO strcmp()
     {
         LEntry* entry = tab->entries;
