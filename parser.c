@@ -274,6 +274,8 @@ char* parseASM(const char* const pASM, LTable* tab) {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
       strcat(holder, result->RT);
+      strcat(holder, "0000000000");
+      strcat(holder, result->Funct);
    }
    //WE NEED TO IMPLEMENT SOMETHING FOR J AND ALSO FOR THE LABEL STUFF
    else if (strcmp(command, "lui") == 0) 
@@ -464,8 +466,11 @@ LTable* preProcessLables(FILE* ptr)
    int addr = 0x00000000;
    bool inDataSegment = false;
    int dataAddr = 0x00002000;
-
+   char* startToken2;
+   char* endToken2;
+   int addrPlus = 0;
    char* instruction = calloc(256, sizeof(char));
+   char* instruction2 = calloc(256, sizeof(char));
 
    while(fgets(instruction, 256, ptr) != NULL)
    {
@@ -486,9 +491,16 @@ LTable* preProcessLables(FILE* ptr)
          strtok(instruction, "#");
       }
 
+      strcpy(instruction2, instruction);
+
       startToken = instruction;
       endToken = startToken;
       parseTokens(&startToken, &endToken);
+
+      startToken2 = instruction2;
+      endToken2 = startToken2;
+      parseTokens(&startToken2, &endToken2);
+      addrPlus = addr;
 
       if(*endToken == ':')
       {
@@ -502,8 +514,39 @@ LTable* preProcessLables(FILE* ptr)
          }
       }
 
+      //NEW STUFF
+
+      if (*endToken2 == ':' && inDataSegment) {
+         startToken2 = endToken2 +1;
+         endToken2 = startToken2;
+         parseTokens(&startToken2, &endToken2);
+
+         //in a .word segment
+         if(*(startToken2+1) == 'w')
+         {
+            startToken2 = endToken2 +1;
+            endToken2 = startToken2;
+            addrPlus = parseWordSegPre(&startToken2, &endToken2);
+            dataAddr += (addrPlus -1) * 4;
+         }
+         //in a .asciiz segment
+         else if(*(startToken2+1) == 'a')
+         {
+            startToken2 = endToken2 +1;
+            endToken2 = startToken2;
+            char* temp = parseLast(&startToken2, &endToken2);
+            while(*temp++)
+            {
+               dataAddr += 1;
+            }
+         }
+      }
+      //END NEW STUFF
+
+
       if (inDataSegment) {
          dataAddr += 4;
+         addrPlus = 0;
       }
       else {
          addr += 4;
@@ -511,6 +554,7 @@ LTable* preProcessLables(FILE* ptr)
    }
    
    free(instruction);
+   free(instruction2);
    
    return tab;
 }
@@ -624,8 +668,9 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
    }
 }
 
-void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
+int parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
 {
+  int addr = 0;
   //checks to make sure the tokens are made
   if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)
   {
@@ -684,6 +729,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
     {
       str = word_to_binary(holder);
       fprintf(outputFile,"%s\n", str);
+      addr++;
       free(str);
       holder = 0;
       (*endToken) += 1;
@@ -709,6 +755,7 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
       for(int i = 0; i < holder; i++)
       {
          fprintf(outputFile,"%s\n", str);
+         addr++;
       }
       free(str);
   }
@@ -719,8 +766,10 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
       }
       str = word_to_binary(holder);
       fprintf(outputFile,"%s\n", str);
+      addr++;
       free(str);
   }
+  return addr;
 }
 
 //parses the last instructions
@@ -736,7 +785,7 @@ char* parseLast(char** beginToken, char** endToken)
    //goes until no whitespace
    while (**beginToken != '\0')
    {
-      if(isspace(**beginToken))
+      if(isspace(**beginToken) || **beginToken == '\"')
       {
          (*beginToken) += 1;
       }
@@ -764,7 +813,7 @@ char* parseLast(char** beginToken, char** endToken)
    }
    else
    {
-      while(**endToken != ':' && **endToken != '\0')
+      while(**endToken != ':' && **endToken != '\0' && **endToken != '\"')
       {
          (*endToken) += 1;
          count++;
@@ -828,4 +877,105 @@ void parseTokens(char** beginToken, char** endToken)
       }
    }
    
+}
+
+int parseWordSegPre(char** beginToken, char** endToken)
+{
+  int addr = 0;
+  //checks to make sure the tokens are made
+  if(*beginToken == NULL || *endToken == NULL || beginToken == NULL || endToken == NULL)
+  {
+    return 0;
+  }
+
+  //goes until no whitespace
+  while (**beginToken != '\0')
+  {
+    if(isspace(**beginToken))
+    {
+      (*beginToken) += 1;
+    }
+    else
+    {
+      break;
+    }
+  }
+
+  //if is a blank row than set end to front
+  if(**beginToken == '\0')
+  {
+    *endToken = *beginToken;
+  }
+  //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
+  int holder = 0;
+  int holderCol = 0;
+  char* str;
+  int neg = 0;
+  int col = 0;
+  while(**endToken != '\0')
+  {
+    if(**beginToken == '-')
+    {
+      (*beginToken)++;
+      *endToken = *beginToken;
+      neg = 1;
+    }
+    if(isspace (**endToken))
+    {
+      (*endToken) += 1;
+    }
+    else if((**endToken) == ':')
+    {
+      if(neg == 1)
+      {
+         holder = holder * -1;
+      }
+      holderCol = holder;
+      col = 1;
+      holder = 0;
+      (*endToken) += 1;
+      *beginToken = *endToken;
+    }
+    else if(**endToken == ',')
+    {
+      str = word_to_binary(holder);
+      addr++;
+      free(str);
+      holder = 0;
+      (*endToken) += 1;
+    }
+    else
+    {
+      holder *= 10;
+      int temp = atoi(*endToken);
+      holder += temp;
+      int count = 0;
+      int div = holder;
+      do {
+        div /= 10;
+        ++count;
+      } while (div != 0);
+      (*endToken) += count;
+    }
+  }
+  if(col == 1)
+  {
+      str = word_to_binary(holderCol);
+
+      for(int i = 0; i < holder; i++)
+      {
+         addr++;
+      }
+      free(str);
+  }
+  else {
+      if(neg == 1)
+      {
+         holder = holder * -1;
+      }
+      str = word_to_binary(holder);
+      addr++;
+      free(str);
+  }
+  return addr;
 }
