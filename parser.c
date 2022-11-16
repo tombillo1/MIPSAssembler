@@ -271,17 +271,18 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 			 
 			 result->Imm = getLab(tab, curr);
 			 
-			 int temp = ((result->Imm - num) / 4) - 1;
+			 
 			 
 			 if (curr == NULL) {
 				 result->IMM = NULL;
 			 }
 			 else {
 				 if (strcmp(command, "j") == 0) {
-					 result->IMM = j_to_binary(temp);
+					 result->IMM = j_to_binary(result->Imm);
 					 }
 				 
 				 else {
+					 int temp = ((result->Imm - num) / 4) - 1;
 				 result->IMM = imm_to_binary(temp);
 			 }
 				 }
@@ -420,6 +421,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       strcat(holder, result->RD);
       strcat(holder, result->RS);
       strcat(holder, result->RT);
+      strcat(holder, "00000000000");
    }
    else if(strcmp(command, "syscall") == 0 )
    {
@@ -592,39 +594,6 @@ char* word_to_binary(int input)
     return str;
 }
 
-char* stringToBinary(char* str) 
-{
-    if(str == NULL){
-        return 0;
-    }
-    size_t l = strlen(str);
-    char* bin = malloc(l *8 +1);
-    bin[0] = '\0';
-    for(size_t i = 0; i < l; i++)
-    {
-        char c = str[i];
-        for(int j = 7; j >= 0; --j)
-        {
-            if(c & (1 << j))
-            {
-                strcat(bin, "1");
-            }
-            else{
-                strcat(bin, "0");
-            }
-        }
-    }
-   int size = 32;
-   char* val = "0";
-   char* temp = (char*)malloc(size * sizeof(char)+ 1);
-   strcpy(temp, bin);
-   while(strlen(temp) < size)
-   {
-      strcat(temp, val);
-   }
-    return temp;
-}
-
 //loops through and preprocesses the labels into the table
 //first pass
 LTable* preProcessLables(FILE* ptr)
@@ -722,7 +691,7 @@ LTable* preProcessLables(FILE* ptr)
          dataAddr += 4;
          addrPlus = 0;
       }
-      else if (inTextSegment) {
+      else if (inTextSegment && isalpha(*startToken)) {
          addr += 4;
       }
    }
@@ -833,18 +802,34 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
          //in a .asciiz segment
          else if(*(startToken+1) == 'a')
          {
-            startToken = endToken +1;
+			startToken = endToken +1;
+
             endToken = startToken;
+
             char* temp = parseLast(&startToken, &endToken);
-            char* str = stringToBinary(temp);
-            fprintf(outputFile, "%s\n", str);
-            free(str);
+
+            //char* str = stringToBinary(temp);
+
+            int count = 0;
+
+            for(int i = 0; i < strlen(temp); i++)
+            {
+               int chInt = (int)temp[i];
+               char* bitStr = calloc(32, sizeof(char*));
+               bitStr = val_to_binary(chInt);
+               fprintf(outputFile, "%s", bitStr);
+               count++;
+               if(count == 4)
+               {
+                  fprintf(outputFile, "\n");
+                  count = 0;
+               }
+            }
          }
       }
       else{
          break;
       }
-
    }
 }
 
@@ -954,6 +939,10 @@ int parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
 
 //parses the last instructions
 // it could either work for .asciiz or an instruction
+//parses the last instructions
+
+// it could either work for .asciiz or an instruction
+
 char* parseLast(char** beginToken, char** endToken)
 {
    //checks to make sure the tokens are made
@@ -974,7 +963,7 @@ char* parseLast(char** beginToken, char** endToken)
          break;
       }
    }
-  
+
    int count = 2;
    //if is a blank row than set end to front
    if(**beginToken == '\0')
@@ -993,22 +982,16 @@ char* parseLast(char** beginToken, char** endToken)
    }
    else
    {
-      while(**endToken != ':' && **endToken != '\0' && **endToken != '\"')
+      while(**endToken != '\n' && **endToken != '\"')
       {
          (*endToken) += 1;
          count++;
       }
+      **endToken = '\0';
    }
-   
-   char* result = (char*) malloc(sizeof(char) * (count + 1));
-   char* tempResult = result;
-   
-   for(int i = 0; i < count; i++)
-   {
-      *tempResult = **beginToken;
-      tempResult++;
-      (*beginToken)++;
-   }
+
+   char* result = calloc(count, sizeof(char*));
+   result = *beginToken;
    return result;
 }
 
@@ -1158,4 +1141,29 @@ int parseWordSegPre(char** beginToken, char** endToken)
       free(str);
   }
   return addr;
+}
+
+char* val_to_binary(int input)
+{
+    unsigned int val = (unsigned)input;
+
+    int arr[8]; //holder array
+
+    char* str = calloc(8, sizeof(char));
+
+    for (int i = 7; i >=0; i--) {
+      arr[i] = val & 0x1;
+      val = val >> 1;
+      }
+
+    for(int i = 0; i < 8; i++)
+    {
+      if (arr[i] == 1) {
+        str[i] = '1';
+		}
+        else {
+          str[i] = '0';
+          }
+    }
+    return str;
 }
