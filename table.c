@@ -29,7 +29,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define INSTRUCTIONSIZE 25
+#define INSTRUCTIONSIZE 26
 #define REGISTERSIZE 32
 
 static RegMapping RegMappings[] = {
@@ -93,7 +93,8 @@ struct instructionFormat instructionFormats[] = {
     {"j", NULL, NULL, NULL}, //change
     {"blez", "rs", "rt", "immediate"}, // yes
     {"srav", "rd", "rs", "rt"}, // yes
-    {"sra", "rd", "rt", "sa"} // yes
+    {"sra", "rd", "rt", "sa"}, // yes
+    {"la", "rt", "zlabel", NULL}
 };
 
 char* getArg1(char* check) {
@@ -148,7 +149,8 @@ struct instruction instructions[] = {
     {"lw", "100011", NULL},
     {"sw", "101011", NULL},
     {"lui", "001111", NULL},
-    {"sub", "000000", "100010"}
+    {"sub", "000000", "100010"},
+    {"la", "001000", NULL}
 };
 
 char* getOper(char* check) {

@@ -62,8 +62,7 @@ char* parseASM(const char* const pASM, LTable* tab) {
    char* tempCommand = calloc(index, sizeof(char));;
    strcpy(tempCommand, command);
    
-
-   result->Mnemonic = tempCommand;
+	result->Mnemonic = tempCommand;
    result->Opcode = getOper(tempCommand);
    result->Funct = getFunct(tempCommand);
 
@@ -197,18 +196,41 @@ char* parseASM(const char* const pASM, LTable* tab) {
 	      {
 			   result->IMM = sa_to_binary(atoi(curr));
 	      }
-
       }
+      else if(strcmp(val, "zlabel") == 0) {
+         result->rsName = "$zero";
+         result->rs = getValue("zero");
+         if(curr == NULL)
+		   {
+			   result->RS = NULL;
+	      }
+	      else
+	      {
+			   result->RS = reg_to_binary(result->rs);
+	      }
+	      
+	      strtok(curr, "\n");
+	      
+	      result->Imm = getLab(tab, curr);
+	      
+	      if(curr == NULL)
+		   {
+			   result->IMM = NULL;
+	      }
+	      else
+	      {
+			   result->IMM = imm_to_binary(result->Imm);
+	      }
+	      
+		  }
 
       curr = strtok(NULL, ", ");
    }
 
-
 	// comparisons for different instructions
    // lui has already been done above
 
-
-   if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0)   // for sw and lw instructions
+   if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0 || strcmp(result->Mnemonic, "la") == 0)   // for sw and lw instructions
    {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
@@ -384,6 +406,7 @@ char* sa_to_binary(int input)
 char* word_to_binary(int input)
 {
    unsigned int val = (unsigned)input;
+
    int arr[32]; //holder array
    char* str = calloc(32, sizeof(char));
    for (int i = 31; i >=0; i--) 
@@ -391,7 +414,7 @@ char* word_to_binary(int input)
       arr[i] = val & 0x1;
       val = val >> 1;
    }
-   
+
     for(int i = 0; i < 32; i++)
     {
       if (arr[i] == 1) {
@@ -433,8 +456,8 @@ char* stringToBinary(char* str)
 //first pass
 LTable* preProcessLables(FILE* ptr)
 {
-   LTable tab;
-   tableDef(&tab);
+   LTable* tab = calloc(1, sizeof(LTable));
+   tableDef(tab);
 
    char* startToken;
    char* endToken;
@@ -468,12 +491,12 @@ LTable* preProcessLables(FILE* ptr)
       if(*endToken == ':')
       {
          *endToken = '\0';
-         if(getLab(&tab, startToken) == 0 && inDataSegment)
+         if(getLab(tab, startToken) == 0 && inDataSegment)
          {
-            addLab(&tab, startToken, dataAddr);
+            addLab(tab, startToken, dataAddr);
          }
-         else if (getLab(&tab, startToken) == 0) {
-            addLab(&tab, startToken, addr);
+         else if (getLab(tab, startToken) == 0) {
+            addLab(tab, startToken, addr);
          }
       }
 
@@ -487,7 +510,7 @@ LTable* preProcessLables(FILE* ptr)
    
    free(instruction);
    
-   return &tab;
+   return tab;
 }
 
 //2nd pass which should handle the .data and .text segments as well as all instructions and labels
@@ -599,7 +622,6 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
    }
 }
 
-//parses the .word seg and deals with arrays, len of word, etc.
 void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
 {
   //checks to make sure the tokens are made
@@ -626,16 +648,35 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
   {
     *endToken = *beginToken;
   }
-  
   //gets the token and checks to see if there is a label or a .word, .asciiz, etc section 
-  
   int holder = 0;
+  int holderCol = 0;
   char* str;
+  int neg = 0;
+  int col = 0;
   while(**endToken != '\0')
   {
+    if(**beginToken == '-')
+    {
+      (*beginToken)++;
+      *endToken = *beginToken;
+      neg = 1;
+    }
     if(isspace (**endToken))
     {
       (*endToken) += 1;
+    }
+    else if((**endToken) == ':')
+    {
+      if(neg == 1)
+      {
+         holder = holder * -1;
+      }
+      holderCol = holder;
+      col = 1;
+      holder = 0;
+      (*endToken) += 1;
+      *beginToken = *endToken;
     }
     else if(**endToken == ',')
     {
@@ -647,25 +688,41 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
     }
     else
     {
-      
       holder *= 10;
       int temp = atoi(*endToken);
       holder += temp;
-      
       int count = 0;
       int div = holder;
       do {
         div /= 10;
         ++count;
       } while (div != 0);
-      
       (*endToken) += count;
     }
   }
-  //printf("Val: %d", holder);
-  str = word_to_binary(holder);
-  fprintf(outputFile,"%s\n", str);
-  free(str);
+  if(col == 1)
+  {
+      if(neg == 1)
+      {
+         holderCol = holderCol * -1;
+      }
+      str = word_to_binary(holderCol);
+
+      for(int i = 0; i < holder; i++)
+      {
+         fprintf(outputFile,"%s\n", str);
+      }
+      free(str);
+  }
+  else {
+      if(neg == 1)
+      {
+         holder = holder * -1;
+      }
+      str = word_to_binary(holder);
+      fprintf(outputFile,"%s\n", str);
+      free(str);
+  }
 }
 
 //parses the last instructions

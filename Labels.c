@@ -7,7 +7,7 @@
 //defines table entries, number of labels and capacity
 void tableDef (LTable* table)
 {
-    table->entries = 0;
+    table->entries = NULL;
     table->numLab = 0;
     table->cap = 0;
 }
@@ -15,7 +15,7 @@ void tableDef (LTable* table)
 //resizes the label to the correct size
 bool resize(LTable* table, int updSize)
 {
-    LEntry* newList = malloc(updSize * sizeof(LEntry));
+    LEntry* newList = calloc(updSize, sizeof(LEntry));
 
     char* ptr;
     int holder;
@@ -36,7 +36,7 @@ bool resize(LTable* table, int updSize)
             holder = updSize;
         }
 
-        memcpy (newList, table->entries, holder * sizeof(LEntry));
+        memcpy(newList, table->entries, holder * sizeof(LEntry));
         free(table->entries);
         table->numLab = holder;
     }
@@ -80,10 +80,11 @@ bool addLab (LTable* table, char* label, int addr)
             resize(table, table->cap+1);
         }
         
-        LEntry* newEntry = table->entries + table->numLab;
+        LEntry* newEntry = calloc(1, sizeof(LEntry));
         ++table->numLab;
         newEntry->address = addr;
         newEntry->label = dup;
+        table->entries[table->numLab - 1] = *newEntry;
     }
     return true;               
 }
