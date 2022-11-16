@@ -199,7 +199,7 @@ char* parseASM(const char* const pASM, LTable* tab) {
       }
       else if(strcmp(val, "zlabel") == 0) {
          result->rsName = "$zero";
-         result->rs = getValue("zero");
+         result->rs = getValue("$zero");
          if(curr == NULL)
 		   {
 			   result->RS = NULL;
@@ -461,9 +461,9 @@ LTable* preProcessLables(FILE* ptr)
 
    char* startToken;
    char* endToken;
-   int addr = 0;
+   int addr = 0x00000000;
    bool inDataSegment = false;
-   int dataAddr = 2000;
+   int dataAddr = 0x00002000;
 
    char* instruction = calloc(256, sizeof(char));
 
@@ -476,9 +476,11 @@ LTable* preProcessLables(FILE* ptr)
       }
       else if (*instruction == '.' && *(instruction + 1) == 'd') {
          inDataSegment = true;
+         continue;
       }
       else if (*instruction == '.' && *(instruction + 1) == 't') {
          inDataSegment = false;
+         continue;
       }
       else{
          strtok(instruction, "#");
@@ -702,10 +704,6 @@ void parseWordSeg(char** beginToken, char** endToken, FILE* outputFile)
   }
   if(col == 1)
   {
-      if(neg == 1)
-      {
-         holderCol = holderCol * -1;
-      }
       str = word_to_binary(holderCol);
 
       for(int i = 0; i < holder; i++)
