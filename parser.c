@@ -35,7 +35,7 @@
 #include "parser.h"
 #include "table.h"
 
-char* parseASM(const char* const pASM, LTable* tab) {
+char* parseASM(const char* const pASM, LTable* tab, int num) {
 	
    char* holder= calloc(32, sizeof(char));
 
@@ -223,6 +223,21 @@ char* parseASM(const char* const pASM, LTable* tab) {
 	      }
 	      
 		  }
+		  
+		 else if (strcmp(val, "label") == 0) {
+			 strtok(curr, "\n");
+			 
+			 result->Imm = getLab(tab, curr);
+			 
+			 int temp = ((result->Imm - num) / 4) - 1;
+			 
+			 if (curr == NULL) {
+				 result->IMM = NULL;
+			 }
+			 else {
+				 result->IMM = imm_to_binary(temp);
+				 }
+		}
 
       curr = strtok(NULL, ", ");
    }
@@ -465,6 +480,7 @@ LTable* preProcessLables(FILE* ptr)
    char* endToken;
    int addr = 0x00000000;
    bool inDataSegment = false;
+   bool inTextSegment = false;
    int dataAddr = 0x00002000;
    char* startToken2;
    char* endToken2;
@@ -485,6 +501,7 @@ LTable* preProcessLables(FILE* ptr)
       }
       else if (*instruction == '.' && *(instruction + 1) == 't') {
          inDataSegment = false;
+         inTextSegment = true;
          continue;
       }
       else{
@@ -548,7 +565,7 @@ LTable* preProcessLables(FILE* ptr)
          dataAddr += 4;
          addrPlus = 0;
       }
-      else {
+      else if (inTextSegment && *endToken != ':') {
          addr += 4;
       }
    }
@@ -565,6 +582,7 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
    char *startToken;
    char *endToken;
    bool inDataSegment = false;
+   int count = 0;
 
    char* instruction = calloc(256, sizeof(char));
 
@@ -598,8 +616,9 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
          continue;
       }
       else if(!inDataSegment){
-         char* result = parseASM(startToken, tab);
+         char* result = parseASM(startToken, tab, count);
          fprintf(outputFile, "%s\n",result);
+         count += 4;
          free(result);
       }
 
