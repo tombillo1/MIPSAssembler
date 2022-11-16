@@ -97,7 +97,33 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	   if ((strcmp(command, "lw") == 0 && count == 2) || (strcmp(command, "sw") == 0 && count == 2)) 
 	   {
          char* temp1 =  strtok(curr, "(");
-
+         
+         if (isalpha(*temp1)) {
+			    result->rsName = "$zero";
+				result->rs = getValue("$zero");
+         if(temp1 == NULL)
+         {
+            result->RS = NULL;
+         }
+         else
+         {
+            result->RS = reg_to_binary(result->rs);
+         }
+         
+	      result->Imm = getLab(tab, temp1);
+	      int temp = ((result->Imm - num) / 4) - 1;
+	      
+	      if(curr == NULL)
+		   {
+			   result->IMM = NULL;
+	      }
+	      else
+	      {
+			   result->IMM = imm_to_binary(temp);
+			   }
+			 }
+			 
+		else {
          result->Imm = atoi(temp1);
 
 
@@ -123,6 +149,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
          {
             result->RS = reg_to_binary(result->rs);
          }
+	 }
 
          curr = NULL;
          continue;
@@ -211,7 +238,21 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      
 	      strtok(curr, "\n");
 	      
+	      if (strcmp(command, "li") == 0) {
+			           result->Imm = atoi(curr);
+         if(curr == NULL)
+		   {
+			   result->IMM = NULL;
+	      }
+	      else
+	      {
+			   result->IMM = imm_to_binary(atoi(curr));
+	      }
+			  }
+	      
+	      else {
 	      result->Imm = getLab(tab, curr);
+	      int temp = ((result->Imm - num) / 4) - 1;
 	      
 	      if(curr == NULL)
 		   {
@@ -219,9 +260,10 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      }
 	      else
 	      {
-			   result->IMM = imm_to_binary(result->Imm);
+			   result->IMM = imm_to_binary(temp);
 	      }
 	      
+		  }
 		  }
 		  
 		 else if (strcmp(val, "label") == 0) {
@@ -235,17 +277,73 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 				 result->IMM = NULL;
 			 }
 			 else {
+				 if (strcmp(command, "j") == 0) {
+					 result->IMM = j_to_binary(temp);
+					 }
+				 
+				 else {
 				 result->IMM = imm_to_binary(temp);
+			 }
 				 }
 		}
+		else if (strcmp(val, "blabel") == 0) {
+				result->rdName = "$at";
+				result->rd = getValue("$at");
+				
+         if(curr == NULL)
+		   {
+			   result->RD = NULL;
+	      }
+	      else
+	      {
+			   result->RD = reg_to_binary(result->rd);
+	      }
+	      
+			 strtok(curr, "\n");
+			 
+			 result->Imm = getLab(tab, curr);
+			 
+			 int temp = ((result->Imm - num) / 4) - 1;
+			 
+			 if (curr == NULL) {
+				 result->IMM = NULL;
+			 }
+			 else {
+				 result->IMM = imm_to_binary(temp);
+			 }
+		}
+		else if (strcmp(val, "zrs") == 0) {
+         result->rsName = "$zero";
+         result->rs = getValue("$zero");
+         if(curr == NULL)
+		   {
+			   result->RS = NULL;
+	      }
+	      else
+	      {
+			   result->RS = reg_to_binary(result->rs);
+	      }
+	      
+	     result->rtName = curr;
+         result->rt = getValue(curr);
+         if(curr == NULL)
+		   {
+			   result->RT = NULL;
+	      }
+	      else
+	      {
+			   result->RT = reg_to_binary(curr);
+	      }
+	      
+		}
 
-      curr = strtok(NULL, ", ");
+      curr = strtok(NULL, ", \n");
    }
 
 	// comparisons for different instructions
    // lui has already been done above
 
-   if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0 || strcmp(result->Mnemonic, "la") == 0)   // for sw and lw instructions
+   if(strcmp(result->Mnemonic, "lw") == 0 || strcmp(result->Mnemonic, "sw") == 0 || strcmp(result->Mnemonic, "addi") == 0 || strcmp(result->Mnemonic, "addiu") == 0 || strcmp(result->Mnemonic, "andi") == 0 || strcmp(result->Mnemonic, "slti") == 0 || strcmp(result->Mnemonic, "la") == 0 || strcmp(result->Mnemonic, "li") == 0)   // for sw and lw instructions
    {
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
@@ -261,7 +359,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       strcat(holder, "00000");
       strcat(holder, result->Funct);
    }
-   else if(strcmp(result->Mnemonic, "sra") == 0)
+   else if(strcmp(result->Mnemonic, "sra") == 0 || strcmp(result->Mnemonic, "sll") == 0)
    {
       strcat(holder, result->Opcode);
       strcat(holder, "00000");
@@ -269,13 +367,6 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       strcat(holder, result->RD);
       strcat(holder, result->IMM);
       strcat(holder, result->Funct);
-   }
-   else if(strcmp(result->Mnemonic, "sll") == 0)
-   {
-      strcat(holder, result->Opcode);
-      strcat(holder, result->RD);
-      strcat(holder, result->RT);
-      strcat(holder, result->IMM);
    }
    else if(strcmp(result->Mnemonic, "beq") == 0 || strcmp(result->Mnemonic, "bne") == 0)
    {
@@ -292,6 +383,10 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       strcat(holder, "0000000000");
       strcat(holder, result->Funct);
    }
+   else if (strcmp(result->Mnemonic, "j") == 0) {
+	   strcat(holder, result->Opcode);
+	   strcat(holder, result->IMM);
+	   }
    //WE NEED TO IMPLEMENT SOMETHING FOR J AND ALSO FOR THE LABEL STUFF
    else if (strcmp(command, "lui") == 0) 
    {
@@ -305,12 +400,9 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
    }
    else if (strcmp(command, "bgtz") == 0 || strcmp(result->Mnemonic, "blez") == 0) 
    {
-      result->rs = 0;
-      result->RT = "00000\0";
-
       strcat(holder, result->Opcode);
       strcat(holder, result->RS);
-      strcat(holder, result->RT);
+      strcat(holder, "00000");
       strcat(holder, result->IMM);
    }
    else if(strcmp(command, "nop") == 0)
@@ -345,6 +437,36 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       strcat(holder, result->RS);
       strcat(holder, result->RT);
       strcat(holder, result->Opcode);
+   }
+   else if(strcmp(command, "blt") == 0)
+   {
+	  free(holder);
+	  holder = calloc(65, sizeof(char));
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->RD);
+      strcat(holder, "00000");
+      strcat(holder, result->Funct);
+      strcat(holder, "\n");
+      
+      result->Opcode = getOper("bne");
+      
+      result->RT = reg_to_binary(getValue("$zero"));
+      
+      strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->IMM);
+   }
+   else if(strcmp(command, "move") == 0)
+   {
+	  strcat(holder, result->Opcode);
+      strcat(holder, result->RS);
+      strcat(holder, result->RT);
+      strcat(holder, result->RD);
+      strcat(holder, "00000");
+      strcat(holder, result->Funct);
    }
    return holder;
 }
@@ -386,6 +508,32 @@ char* imm_to_binary(int input)
       }
 
     for(int i = 0; i < 16; i++)
+    {
+      if (arr[i] == 1) {
+        str[i] = '1';
+        }
+        else {
+          str[i] = '0';
+          }
+    }
+    return str;
+}
+
+char* j_to_binary(int input)
+{
+
+    unsigned int val = (unsigned)input;
+
+    int arr[26]; //holder array
+
+    char* str = calloc(26, sizeof(char));
+
+    for (int i = 25; i >=0; i--) {
+      arr[i] = val & 0x1;
+      val = val >> 1;
+      }
+
+    for(int i = 0; i < 26; i++)
     {
       if (arr[i] == 1) {
         str[i] = '1';
@@ -446,27 +594,35 @@ char* word_to_binary(int input)
 
 char* stringToBinary(char* str) 
 {
-	if(str == NULL){
-		return 0;
-	}
-	size_t l = strlen(str);
-	char* bin = malloc(l *8 +1);
-	bin[0] = '\0';
-	for(size_t i = 0; i < l; i++)
-	{
-		char c = str[i];
-		for(int j = 7; j >= 0; --j)
-		{
-			if(c & (1 << j))
-			{
-				strcat(bin, "1");
-			}
-			else{
-				strcat(bin, "0");
-			}
-		}
-	}
-	return bin;
+    if(str == NULL){
+        return 0;
+    }
+    size_t l = strlen(str);
+    char* bin = malloc(l *8 +1);
+    bin[0] = '\0';
+    for(size_t i = 0; i < l; i++)
+    {
+        char c = str[i];
+        for(int j = 7; j >= 0; --j)
+        {
+            if(c & (1 << j))
+            {
+                strcat(bin, "1");
+            }
+            else{
+                strcat(bin, "0");
+            }
+        }
+    }
+   int size = 32;
+   char* val = "0";
+   char* temp = (char*)malloc(size * sizeof(char)+ 1);
+   strcpy(temp, bin);
+   while(strlen(temp) < size)
+   {
+      strcat(temp, val);
+   }
+    return temp;
 }
 
 //loops through and preprocesses the labels into the table
@@ -612,6 +768,10 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab)
       startToken = instruction;
       endToken = startToken;
       parseTokens(&startToken, &endToken);
+      
+      if (!isalpha(*startToken)) {
+		  continue;
+		  }
 
       if (*endToken == ':' && !inDataSegment) {
          continue;

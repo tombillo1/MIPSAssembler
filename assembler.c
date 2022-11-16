@@ -28,10 +28,9 @@ int main(int argc, char *argv[]) {
     
     if (argc > 3) //CHANGE TO strcmp()
     {
-        LEntry* entry = tab->entries;
         for(int i = 0; i < tab->numLab; i++)
         {
-            printf("0x%08X\t%s\n", entry->address, entry->label);
+            fprintf(out, "0x%08X:  %s\n", tab->entries[i].address, tab->entries[i].label);
         }
     }
     else{

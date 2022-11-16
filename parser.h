@@ -14,6 +14,7 @@ void processLabels(FILE* fileName, FILE* outputFile, LTable* tab);
 int parseWordSeg(char** beginToken, char** endToken, FILE* outputFile);
 char* parseLast(char** beginToken, char** endToken);
 char* sa_to_binary(int input);
+char* j_to_binary(int input);
 int parseWordSegPre(char** beginToken, char** endToken);
 
 #endif
