@@ -26,25 +26,19 @@ int main(int argc, char *argv[]) {
 
     LTable* tab = preProcessLables(ptr);
     
-    char s[] = "-symbols";
-    
-    /**
-    if (strcmp(argv[3], s) == 0) //CHANGE TO strcmp()
+    if (argc > 3) //CHANGE TO strcmp()
     {
-        int numLabels = getEntries(tab);
         LEntry* entry = tab->entries;
-        for(int i = 0; i < numLabels; i++)
+        for(int i = 0; i < tab->numLab; i++)
         {
-            printf("%x\t%s", entry->address, entry->label);
-            entry++;
+            printf("0x%08X\t%s\n", entry->address, entry->label);
         }
     }
-    */
-    //else{
+    else{
 		fclose(ptr);
 		ptr = fopen(argv[1], "r");
         processLabels(ptr, out, tab);
-    //}
+    }
  
     // Closing the file
     fclose(ptr);
