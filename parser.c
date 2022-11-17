@@ -278,7 +278,8 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 			 }
 			 else {
 				 if (strcmp(command, "j") == 0) {
-					 result->IMM = j_to_binary(result->Imm);
+					 int temp = (result->Imm / 4); 
+					 result->IMM = j_to_binary(temp);
 					 }
 				 
 				 else {
