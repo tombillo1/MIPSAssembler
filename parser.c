@@ -111,7 +111,6 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
          }
          
 	      result->Imm = getLab(tab, temp1);
-	      int temp = ((result->Imm - num) / 4) - 1;
 	      
 	      if(curr == NULL)
 		   {
@@ -119,7 +118,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      }
 	      else
 	      {
-			   result->IMM = imm_to_binary(temp);
+			   result->IMM = imm_to_binary(result->Imm);
 			   }
 			 }
 			 
@@ -239,7 +238,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      strtok(curr, "\n");
 	      
 	      if (strcmp(command, "li") == 0) {
-			           result->Imm = atoi(curr);
+			   result->Imm = atoi(curr);
          if(curr == NULL)
 		   {
 			   result->IMM = NULL;
@@ -252,7 +251,6 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      
 	      else {
 	      result->Imm = getLab(tab, curr);
-	      int temp = ((result->Imm - num) / 4) - 1;
 	      
 	      if(curr == NULL)
 		   {
@@ -260,7 +258,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
 	      }
 	      else
 	      {
-			   result->IMM = imm_to_binary(temp);
+			   result->IMM = imm_to_binary(result->Imm);
 	      }
 	      
 		  }
@@ -458,7 +456,7 @@ char* parseASM(const char* const pASM, LTable* tab, int num) {
       result->RT = reg_to_binary(getValue("$zero"));
       
       strcat(holder, result->Opcode);
-      strcat(holder, result->RS);
+      strcat(holder, reg_to_binary(getValue("$at")));
       strcat(holder, result->RT);
       strcat(holder, result->IMM);
    }
